@@ -1,0 +1,268 @@
+---
+title: "TIER2 Recommendations"
+subtitle: "Stakeholder Responsibility Matrix"
+date: today
+format:
+  html:
+    self-contained: true
+    theme: litera
+    toc: false
+    page-layout: full
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+This matrix maps 12 recommendations for improving research reproducibility across five stakeholder groups and four thematic categories. Click any recommendation chip to expand its full description.
+
+---
+
+```{r}
+#| label: setup
+
+library(readxl)
+
+df <- read_excel("TIER2_recommendations.xlsx") |>
+  setNames(c("id", "title", "description", "category", "stakeholder"))
+
+recs_list <- lapply(seq_len(nrow(df)), function(i) {
+  list(
+    id    = trimws(as.character(df$id[i])),
+    title = trimws(df$title[i]),
+    desc  = trimws(df$description[i]),
+    cat   = trimws(df$category[i]),
+    stks  = as.list(trimws(strsplit(trimws(df$stakeholder[i]), ";")[[1]]))
+  )
+})
+
+ojs_define(recs_raw = recs_list)
+```
+
+```{ojs}
+//| label: matrix
+
+recs = recs_raw
+
+cats = [
+  {
+    label: "Infrastructure & standards",
+    match: "Infrastructure, standards and community",
+    color: "#5DCAA5", bg: "#E1F5EE", tx: "#085041"
+  },
+  {
+    label: "Incentives & policy",
+    match: "Incentives and policy",
+    color: "#7F77DD", bg: "#EEEDFE", tx: "#26215C"
+  },
+  {
+    label: "Training & skills",
+    match: "Training and skills",
+    color: "#EF9F27", bg: "#FAEEDA", tx: "#412402"
+  },
+  {
+    label: "Evidence-based policy",
+    match: "Evidence-based policy",
+    color: "#D85A30", bg: "#FAECE7", tx: "#4A1B0C"
+  }
+]
+
+stakeholders = [
+  { name: "Funders",              icon: "💰" },
+  { name: "Publishers",           icon: "📖" },
+  { name: "Institutions",         icon: "🏛️" },
+  { name: "Research Communities", icon: "🔬" },
+  { name: "Meta-Researchers",     icon: "📊" }
+]
+
+widget = {
+  // ── Styles ──────────────────────────────────────────────────────────────
+  const style = document.createElement("style");
+  style.textContent = `
+    .t2-wrap        { font-family: system-ui, -apple-system, sans-serif; }
+    .t2-legend      { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; align-items:center; }
+    .t2-legend-item { display:inline-block; padding:4px 11px; border-radius:20px; font-size:11px; font-weight:600; border:1px solid transparent; }
+    .t2-scroll      { overflow-x:auto; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; }
+    .t2-table       { width:100%; border-collapse:collapse; font-size:13px; }
+    .t2-table th    { padding:11px 14px; text-align:left; font-weight:500; color:#6b7280;
+                      border-bottom:1px solid #e5e7eb; background:#f9fafb; white-space:nowrap; }
+    .t2-table td    { padding:10px 14px; vertical-align:top; border-bottom:1px solid #f3f4f6; }
+    .t2-table tbody tr:last-child td { border-bottom:none; }
+    .t2-table tbody tr:hover td      { background:#fafafa; transition:background .1s; }
+    .t2-sth         { font-weight:500; color:#111827; white-space:nowrap; min-width:155px; }
+    .t2-chip        { display:inline-block; padding:3px 9px; border-radius:20px; font-size:11px;
+                      font-weight:600; margin:2px; border:1px solid transparent; cursor:pointer;
+                      line-height:1.65; transition:opacity .15s; }
+    .t2-chip:hover  { opacity:.65; }
+    .t2-chip.active { outline:2px solid #374151; outline-offset:1px; }
+    .t2-nil         { color:#d1d5db; font-size:13px; }
+    .t2-detail      { border-left:4px solid #e5e7eb; border-radius:0 10px 10px 0; padding:16px 20px;
+                      margin-top:14px; background:#fff;
+                      border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; }
+    .t2-detail-id   { display:inline-block; padding:2px 9px; border-radius:12px; font-size:11px;
+                      font-weight:600; margin-right:8px; }
+    .t2-stk-tag     { display:inline-block; padding:2px 9px; border-radius:12px; font-size:11px;
+                      border:1px solid #e5e7eb; color:#6b7280; background:#f9fafb; margin:2px; }
+    .t2-close       { background:none; border:none; cursor:pointer; color:#9ca3af; font-size:20px;
+                      padding:0; line-height:1; }
+    .t2-close:hover { color:#374151; }
+    .t2-hint        { font-size:12px; color:#9ca3af; margin-top:10px; margin-bottom:0; }
+  `;
+
+  // ── Container ────────────────────────────────────────────────────────────
+  const root = document.createElement("div");
+  root.className = "t2-wrap";
+  root.appendChild(style);
+
+  // ── Legend ───────────────────────────────────────────────────────────────
+  const legend = document.createElement("div");
+  legend.className = "t2-legend";
+  legend.innerHTML =
+    `<span style="font-size:12px;color:#9ca3af;margin-right:2px;align-self:center">Categories:</span>` +
+    cats.map(c =>
+      `<span class="t2-legend-item" style="background:${c.bg};color:${c.tx};border-color:${c.color}">
+         ${c.label}
+       </span>`
+    ).join("");
+  root.appendChild(legend);
+
+  // ── Summary counts ────────────────────────────────────────────────────────
+  const summary = document.createElement("div");
+  summary.style.cssText = "display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px";
+  const totalRecs = recs.length;
+  const totalStks = stakeholders.length; // stakeholders is now [{name, icon}]
+  const totalCats = cats.length;
+  [
+    [`${totalRecs}`, "recommendations"],
+    [`${totalStks}`, "stakeholder groups"],
+    [`${totalCats}`, "thematic categories"]
+  ].forEach(([n, label]) => {
+    summary.innerHTML += `
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 14px;display:flex;align-items:baseline;gap:6px">
+        <span style="font-size:20px;font-weight:600;color:#111827">${n}</span>
+        <span style="font-size:12px;color:#6b7280">${label}</span>
+      </div>`;
+  });
+  root.appendChild(summary);
+
+  // ── Table ─────────────────────────────────────────────────────────────────
+  const scroll = document.createElement("div");
+  scroll.className = "t2-scroll";
+
+  const table = document.createElement("table");
+  table.className = "t2-table";
+
+  // Header row
+  const thead = document.createElement("thead");
+  const hrow = document.createElement("tr");
+  hrow.innerHTML =
+    `<th>Stakeholder</th>` +
+    cats.map(c =>
+      `<th>
+         <span style="display:inline-block;width:8px;height:8px;border-radius:50%;
+                      background:${c.color};margin-right:6px;vertical-align:middle"></span>
+         ${c.label}
+       </th>`
+    ).join("");
+  thead.appendChild(hrow);
+  table.appendChild(thead);
+
+  // Body rows
+  const tbody = document.createElement("tbody");
+  stakeholders.forEach(stk => {
+    const tr = document.createElement("tr");
+    let html = `<td class="t2-sth"><span style="margin-right:7px;font-size:15px">${stk.icon}</span>${stk.name}</td>`;
+    cats.forEach(cat => {
+      const matching = recs.filter(r =>
+        r.cat.trim() === cat.match &&
+        r.stks.some(s => s.trim() === stk.name)
+      );
+      const content = matching.length > 0
+        ? matching.map(r =>
+            `<span class="t2-chip" data-id="${r.id}"
+                   style="background:${cat.bg};color:${cat.tx};border-color:${cat.color}">
+               ${r.id}
+             </span>`
+          ).join("")
+        : `<span class="t2-nil">—</span>`;
+      html += `<td>${content}</td>`;
+    });
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  scroll.appendChild(table);
+  root.appendChild(scroll);
+
+  // ── Detail panel ──────────────────────────────────────────────────────────
+  const detail = document.createElement("div");
+  detail.className = "t2-detail";
+  detail.style.display = "none";
+  root.appendChild(detail);
+
+  // Hint
+  const hint = document.createElement("p");
+  hint.className = "t2-hint";
+  hint.textContent = "Click any recommendation chip to view its full description.";
+  root.appendChild(hint);
+
+  // ── Event handling ────────────────────────────────────────────────────────
+  let activeChip = null;
+
+  function renderDetail(rec) {
+    const cat = cats.find(c => c.match === rec.cat.trim());
+    detail.style.display = "block";
+    detail.style.borderLeftColor = cat.color;
+    detail.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <span class="t2-detail-id"
+                style="background:${cat.bg};color:${cat.tx}">${rec.id}</span>
+          <span style="font-size:12px;color:#6b7280">${cat.label}</span>
+        </div>
+        <button class="t2-close" id="t2-close-btn">×</button>
+      </div>
+      <p style="margin:0 0 8px;font-size:15px;font-weight:500;color:#111827;line-height:1.45">
+        ${rec.title}
+      </p>
+      <p style="margin:0 0 14px;font-size:13px;color:#4b5563;line-height:1.7">
+        ${rec.desc}
+      </p>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+        <span style="font-size:12px;color:#9ca3af;margin-right:4px">Involves:</span>
+        ${rec.stks.map(s => `<span class="t2-stk-tag">${s.trim()}</span>`).join("")}
+      </div>
+    `;
+    detail.querySelector("#t2-close-btn").addEventListener("click", () => {
+      detail.style.display = "none";
+      hint.style.display = "block";
+      if (activeChip) { activeChip.classList.remove("active"); activeChip = null; }
+    });
+    hint.style.display = "none";
+    detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  table.addEventListener("click", e => {
+    const chip = e.target.closest(".t2-chip");
+    if (!chip) return;
+
+    // Toggle off if clicking the same chip
+    if (activeChip === chip) {
+      detail.style.display = "none";
+      hint.style.display = "block";
+      chip.classList.remove("active");
+      activeChip = null;
+      return;
+    }
+
+    if (activeChip) activeChip.classList.remove("active");
+    chip.classList.add("active");
+    activeChip = chip;
+
+    const rec = recs.find(r => r.id === chip.dataset.id);
+    if (rec) renderDetail(rec);
+  });
+
+  return root;
+}
+```

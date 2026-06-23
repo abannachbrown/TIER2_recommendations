@@ -1,0 +1,468 @@
+---
+title: "TIER2 Recommendation Bubble Plot"
+subtitle: "Interactive Stakeholder and Category View"
+date: today
+format:
+  html:
+    self-contained: true
+    theme: litera
+    toc: false
+    page-layout: full
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{=html}
+<style>
+  body { background: #FFFFFF; color: #0D2557; }
+  .quarto-title-block .title {
+    color: #0D2557;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .quarto-title-block .subtitle {
+    color: #32dbce;
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .quarto-title-block + hr, hr {
+    border: none;
+    border-top: 2px solid #32dbce;
+    opacity: 1;
+    margin: 1rem 0 1.4rem;
+  }
+  .quarto-document-content > p:first-of-type {
+    color: #3a4f7a;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+</style>
+```
+
+This interactive bubble plot maps recommendations across stakeholder groups and thematic categories. Use the category chips or stakeholder filters to focus the display, and click any bubble to view the full recommendation below.
+
+---
+
+```{r}
+#| label: setup
+
+library(readxl)
+
+df <- read_excel("TIER2_recommendations.xlsx") |>
+  setNames(c("id", "title", "description", "category", "stakeholder"))
+
+recs_list <- lapply(seq_len(nrow(df)), function(i) {
+  list(
+    id = trimws(as.character(df$id[i])),
+    title = trimws(df$title[i]),
+    desc = trimws(df$description[i]),
+    cat = trimws(df$category[i]),
+    stks = as.list(trimws(strsplit(trimws(df$stakeholder[i]), ";")[[1]]))
+  )
+})
+
+ojs_define(recs_raw = recs_list)
+```
+
+```{ojs}
+//| label: bubble-plot
+
+recs = recs_raw
+
+cats = [
+  {
+    label: "Infrastructure & standards",
+    match: "Infrastructure, standards and community",
+    color: "#0D2557",
+    bg: "#dce3f0",
+    tx: "#0D2557"
+  },
+  {
+    label: "Incentives & policy",
+    match: "Incentives and policy",
+    color: "#32dbce",
+    bg: "#d6f8f5",
+    tx: "#084845"
+  },
+  {
+    label: "Training & skills",
+    match: "Training and skills",
+    color: "#1a7fc4",
+    bg: "#daeaf8",
+    tx: "#0a3358"
+  },
+  {
+    label: "Evidence-based policy",
+    match: "Evidence-based policy",
+    color: "#4E9B8E",
+    bg: "#E3F3F0",
+    tx: "#1F4F49"
+  }
+]
+
+stakeholders = [
+  { name: "Funders", icon: "💰" },
+  { name: "Publishers", icon: "📖" },
+  { name: "Institutions", icon: "🏛️" },
+  { name: "Research Communities", icon: "🔬" },
+  { name: "Meta-Researchers", icon: "📊" }
+]
+
+bubbleData = {
+  const points = []
+  recs.forEach(rec => {
+    const cat = cats.find(c => c.match === rec.cat.trim())
+    rec.stks.forEach(stk => {
+      points.push({
+        id: `${rec.id}-${stk.trim()}`,
+        recId: rec.id,
+        title: rec.title,
+        desc: rec.desc,
+        category: cat,
+        stakeholder: stk.trim()
+      })
+    })
+  })
+  return points
+}
+
+bubbleWidget = {
+  const style = document.createElement("style")
+  style.textContent = `
+    .t2b-wrap { font-family: system-ui, -apple-system, sans-serif; }
+    .t2b-legend, .t2b-stakeholders, .t2b-controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; }
+    .t2b-label { font-size:11px; font-weight:600; color:#6b7ea8; text-transform:uppercase; letter-spacing:.6px; margin-right:4px; }
+    .t2b-chip, .t2b-filter {
+      display:inline-block; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:600;
+      border:1.5px solid transparent; cursor:pointer; transition:opacity .15s, transform .15s, box-shadow .15s;
+    }
+    .t2b-filter { background:#f7f9fc; color:#3a4f7a; border-color:#d8e0ef; }
+    .t2b-chip:hover, .t2b-filter:hover { opacity:.85; transform:translateY(-1px); }
+    .t2b-chip.active, .t2b-filter.active { box-shadow:0 0 0 2px #0D2557; }
+    .t2b-chip.dim, .t2b-filter.dim { opacity:.35; }
+    .t2b-reset {
+      border:1.5px solid #c5cce0; background:#FFFFFF; color:#0D2557; border-radius:999px;
+      padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer;
+    }
+    .t2b-reset[hidden] { display:none; }
+    .t2b-note { font-size:12px; color:#6b7ea8; }
+    .t2b-frame { border:1.5px solid #ebecf0; border-radius:12px; background:#FFFFFF; overflow:hidden; }
+    .t2b-svg { display:block; width:100%; height:auto; background:#FFFFFF; }
+    .t2b-axis { font-size:12px; fill:#0D2557; font-weight:600; }
+    .t2b-grid { stroke:#eef2f8; stroke-width:1; }
+    .t2b-cell-label { font-size:12px; fill:#8a99b8; font-weight:600; }
+    .t2b-point { cursor:pointer; transition:opacity .15s; }
+    .t2b-point.dim { opacity:.18; }
+    .t2b-point.active .t2b-circle { stroke:#0D2557; stroke-width:3; }
+    .t2b-circle { stroke-width:2; }
+    .t2b-id { font-size:10px; font-weight:700; text-anchor:middle; dominant-baseline:middle; pointer-events:none; }
+    .t2b-detail {
+      border-left:4px solid #32dbce; border-radius:0 10px 10px 0; padding:18px 22px; margin-top:14px;
+      background:#FFFFFF; border-top:1.5px solid #ebecf0; border-right:1.5px solid #ebecf0; border-bottom:1.5px solid #ebecf0;
+      display:none;
+    }
+    .t2b-hint { font-size:12px; color:#8a99b8; margin-top:10px; margin-bottom:0; }
+    .t2b-rec-chip, .t2b-tag {
+      display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px; margin:2px;
+    }
+    .t2b-rec-chip { font-weight:700; border:1.5px solid transparent; margin-right:8px; }
+    .t2b-tag { border:1.5px solid #c5cce0; color:#0D2557; background:#ebecf0; font-weight:500; }
+    .t2b-close { background:none; border:none; cursor:pointer; color:#8a99b8; font-size:22px; padding:0; line-height:1; }
+  `
+
+  const root = document.createElement("div")
+  root.className = "t2b-wrap"
+  root.appendChild(style)
+
+  const categoryLegend = document.createElement("div")
+  categoryLegend.className = "t2b-legend"
+  categoryLegend.innerHTML =
+    `<span class="t2b-label">Categories:</span>` +
+    cats.map(cat =>
+      `<span class="t2b-chip" data-category="${cat.match}" style="background:${cat.bg};color:${cat.tx};border-color:${cat.color}">
+        ${cat.label}
+      </span>`
+    ).join("")
+  root.appendChild(categoryLegend)
+
+  const stakeholderLegend = document.createElement("div")
+  stakeholderLegend.className = "t2b-stakeholders"
+  stakeholderLegend.innerHTML =
+    `<span class="t2b-label">Stakeholders:</span>` +
+    stakeholders.map(stk =>
+      `<span class="t2b-filter" data-stakeholder="${stk.name}">${stk.icon} ${stk.name}</span>`
+    ).join("")
+  root.appendChild(stakeholderLegend)
+
+  const controls = document.createElement("div")
+  controls.className = "t2b-controls"
+  controls.innerHTML = `
+    <button class="t2b-reset" id="t2b-reset" hidden>Reset filters</button>
+    <span class="t2b-note" id="t2b-note">Click a category or stakeholder to filter, or click a bubble to view the recommendation.</span>
+  `
+  root.appendChild(controls)
+
+  const frame = document.createElement("div")
+  frame.className = "t2b-frame"
+
+  const svgNS = "http://www.w3.org/2000/svg"
+  const svg = document.createElementNS(svgNS, "svg")
+  svg.setAttribute("viewBox", "0 0 1120 720")
+  svg.setAttribute("class", "t2b-svg")
+
+  const chart = { left: 170, right: 1060, top: 70, bottom: 610 }
+  const width = chart.right - chart.left
+  const height = chart.bottom - chart.top
+  const colWidth = width / stakeholders.length
+  const rowHeight = height / cats.length
+
+  const active = { category: null, stakeholder: null, point: null }
+
+  const detail = document.createElement("div")
+  detail.className = "t2b-detail"
+
+  const hint = document.createElement("p")
+  hint.className = "t2b-hint"
+  hint.textContent = "Click any bubble to view the full recommendation."
+
+  function addText(x, y, text, cls, anchor = "middle") {
+    const el = document.createElementNS(svgNS, "text")
+    el.setAttribute("x", x)
+    el.setAttribute("y", y)
+    el.setAttribute("class", cls)
+    el.setAttribute("text-anchor", anchor)
+    el.textContent = text
+    svg.appendChild(el)
+    return el
+  }
+
+  for (let i = 0; i <= stakeholders.length; i += 1) {
+    const line = document.createElementNS(svgNS, "line")
+    const x = chart.left + i * colWidth
+    line.setAttribute("x1", x)
+    line.setAttribute("x2", x)
+    line.setAttribute("y1", chart.top)
+    line.setAttribute("y2", chart.bottom)
+    line.setAttribute("class", "t2b-grid")
+    svg.appendChild(line)
+  }
+
+  for (let i = 0; i <= cats.length; i += 1) {
+    const line = document.createElementNS(svgNS, "line")
+    const y = chart.top + i * rowHeight
+    line.setAttribute("x1", chart.left)
+    line.setAttribute("x2", chart.right)
+    line.setAttribute("y1", y)
+    line.setAttribute("y2", y)
+    line.setAttribute("class", "t2b-grid")
+    svg.appendChild(line)
+  }
+
+  stakeholders.forEach((stk, i) => {
+    addText(chart.left + (i + 0.5) * colWidth, 42, stk.name, "t2b-axis")
+  })
+
+  cats.forEach((cat, i) => {
+    addText(150, chart.top + (i + 0.52) * rowHeight, cat.label, "t2b-axis", "end")
+  })
+
+  const bubbleLayer = document.createElementNS(svgNS, "g")
+  svg.appendChild(bubbleLayer)
+
+  const grouped = new Map()
+  bubbleData.forEach(point => {
+    const key = `${point.category.match}__${point.stakeholder}`
+    if (!grouped.has(key)) grouped.set(key, [])
+    grouped.get(key).push(point)
+  })
+
+  const pointEntries = []
+  grouped.forEach((points, key) => {
+    const [categoryMatch, stakeholderName] = key.split("__")
+    const row = cats.findIndex(cat => cat.match === categoryMatch)
+    const col = stakeholders.findIndex(stk => stk.name === stakeholderName)
+    const centerX = chart.left + (col + 0.5) * colWidth
+    const centerY = chart.top + (row + 0.5) * rowHeight
+    const patterns = {
+      1: [[0, 0]],
+      2: [[-30, 0], [30, 0]],
+      3: [[0, -26], [-28, 18], [28, 18]],
+      4: [[-28, -18], [28, -18], [-28, 18], [28, 18]]
+    }
+    const offsets = patterns[points.length] || points.map((_, i) => [((i % 3) - 1) * 28, (Math.floor(i / 3) - 0.5) * 24])
+
+    points.forEach((point, i) => {
+      const group = document.createElementNS(svgNS, "g")
+      group.setAttribute("class", "t2b-point")
+      group.setAttribute("transform", `translate(${centerX + offsets[i][0]}, ${centerY + offsets[i][1]})`)
+
+      const circle = document.createElementNS(svgNS, "circle")
+      circle.setAttribute("r", 24)
+      circle.setAttribute("class", "t2b-circle")
+      circle.setAttribute("fill", point.category.bg)
+      circle.setAttribute("stroke", point.category.color)
+      group.appendChild(circle)
+
+      const label = document.createElementNS(svgNS, "text")
+      label.setAttribute("class", "t2b-id")
+      label.setAttribute("fill", point.category.tx)
+      label.textContent = point.recId.replace(/\.$/, "")
+      group.appendChild(label)
+
+      group.addEventListener("click", () => {
+        pointEntries.forEach(({ el }) => el.classList.remove("active"))
+        active.point = point
+        group.classList.add("active")
+        renderDetail(point)
+      })
+
+      bubbleLayer.appendChild(group)
+      pointEntries.push({ point, el: group })
+    })
+  })
+
+  function renderDetail(point) {
+    detail.style.display = "block"
+    detail.style.borderLeftColor = point.category.color
+    const rec = recs.find(r => r.id === point.recId)
+    detail.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <span class="t2b-rec-chip" style="background:${point.category.bg};color:${point.category.tx};border-color:${point.category.color}">${point.recId}</span>
+          <span style="font-size:12px;color:#6b7ea8;font-weight:500">${point.category.label}</span>
+        </div>
+        <button class="t2b-close" id="t2b-close">×</button>
+      </div>
+      <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">${point.title}</p>
+      <p style="margin:0 0 14px;font-size:13px;color:#3a4f7a;line-height:1.75">${point.desc}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+        <span style="font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500">Stakeholder ownership:</span>
+        ${rec.stks.map(stk => `<span class="t2b-tag">${stk.trim()}</span>`).join("")}
+      </div>
+    `
+    detail.querySelector("#t2b-close").addEventListener("click", () => {
+      detail.style.display = "none"
+      hint.style.display = "block"
+      pointEntries.forEach(({ el }) => el.classList.remove("active"))
+      active.point = null
+    })
+    hint.style.display = "none"
+  }
+
+  function renderFilterDetail(matches) {
+    const parts = []
+    if (active.category) parts.push(cats.find(c => c.match === active.category)?.label || active.category)
+    if (active.stakeholder) parts.push(active.stakeholder)
+    const title = `Filtered recommendations: ${parts.join(" + ")}`
+    detail.style.display = "block"
+    detail.style.borderLeftColor = active.category ? (cats.find(c => c.match === active.category)?.color || "#32dbce") : "#32dbce"
+    detail.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">${title}</p>
+          <p style="margin:0;font-size:12px;color:#6b7ea8;line-height:1.6">${matches.length} recommendation${matches.length === 1 ? "" : "s"} match the current filter.</p>
+        </div>
+        <button class="t2b-close" id="t2b-close">×</button>
+      </div>
+      ${matches.map(point => {
+        const rec = recs.find(r => r.id === point.recId)
+        return `
+          <div style="padding:12px 0 12px 12px;border-top:1px solid #ebecf0;border-left:3px solid ${point.category.color}">
+            <div style="margin-bottom:8px">
+              <span class="t2b-rec-chip" style="background:${point.category.bg};color:${point.category.tx};border-color:${point.category.color}">${point.recId}</span>
+              <span style="font-size:12px;color:#6b7ea8;font-weight:500">${point.category.label} · ${point.stakeholder}</span>
+            </div>
+            <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">${point.title}</p>
+            <p style="margin:0 0 12px;font-size:13px;color:#3a4f7a;line-height:1.75">${point.desc}</p>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+              <span style="font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500">Stakeholder ownership:</span>
+              ${rec.stks.map(stk => `<span class="t2b-tag">${stk.trim()}</span>`).join("")}
+            </div>
+          </div>
+        `
+      }).join("")}
+    `
+    detail.querySelector("#t2b-close").addEventListener("click", () => {
+      active.category = null
+      active.stakeholder = null
+      updateFilters()
+    })
+    hint.style.display = "none"
+  }
+
+  function updateFilters() {
+    const hasFilters = !!(active.category || active.stakeholder)
+
+    categoryLegend.querySelectorAll(".t2b-chip").forEach(chip => {
+      const match = chip.dataset.category === active.category
+      chip.classList.toggle("active", match)
+      chip.classList.toggle("dim", !!active.category && !match)
+    })
+
+    stakeholderLegend.querySelectorAll(".t2b-filter").forEach(chip => {
+      const match = chip.dataset.stakeholder === active.stakeholder
+      chip.classList.toggle("active", match)
+      chip.classList.toggle("dim", !!active.stakeholder && !match)
+    })
+
+    const matches = []
+    pointEntries.forEach(({ point, el }) => {
+      const matchCategory = !active.category || point.category.match === active.category
+      const matchStakeholder = !active.stakeholder || point.stakeholder === active.stakeholder
+      const visible = matchCategory && matchStakeholder
+      el.classList.toggle("dim", !visible)
+      if (visible) matches.push(point)
+    })
+
+    controls.querySelector("#t2b-reset").hidden = !hasFilters
+    if (!hasFilters) {
+      controls.querySelector("#t2b-note").textContent = "Click a category or stakeholder to filter, or click a bubble to view the recommendation."
+      if (!active.point) {
+        detail.style.display = "none"
+        hint.style.display = "block"
+      }
+    } else {
+      const parts = []
+      if (active.category) parts.push(cats.find(c => c.match === active.category)?.label || active.category)
+      if (active.stakeholder) parts.push(active.stakeholder)
+      controls.querySelector("#t2b-note").textContent = `Filtered by ${parts.join(" + ")}.`
+      pointEntries.forEach(({ el }) => el.classList.remove("active"))
+      active.point = null
+      renderFilterDetail(matches)
+    }
+  }
+
+  categoryLegend.addEventListener("click", e => {
+    const chip = e.target.closest(".t2b-chip")
+    if (!chip) return
+    active.category = active.category === chip.dataset.category ? null : chip.dataset.category
+    updateFilters()
+  })
+
+  stakeholderLegend.addEventListener("click", e => {
+    const chip = e.target.closest(".t2b-filter")
+    if (!chip) return
+    active.stakeholder = active.stakeholder === chip.dataset.stakeholder ? null : chip.dataset.stakeholder
+    updateFilters()
+  })
+
+  controls.querySelector("#t2b-reset").addEventListener("click", () => {
+    active.category = null
+    active.stakeholder = null
+    updateFilters()
+  })
+
+  frame.appendChild(svg)
+  root.appendChild(frame)
+  root.appendChild(detail)
+  root.appendChild(hint)
+
+  updateFilters()
+
+  return root
+}
+```

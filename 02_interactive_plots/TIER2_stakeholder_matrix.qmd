@@ -1,0 +1,1602 @@
+---
+title: "TIER2 Recommendations"
+subtitle: "Visualisations for Stakeholder Recommendation Interactions"
+date: today
+format:
+  html:
+    self-contained: true
+    theme: litera
+    toc: false
+    page-layout: full
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{=html}
+<style>
+  /* ── Page-level brand overrides ────────────────────────────────────────── */
+  body { background: #FFFFFF; color: #0D2557; }
+
+  /* Title block */
+  .quarto-title-block .title {
+    color: #0D2557;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .quarto-title-block .subtitle {
+    color: #32dbce;
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .quarto-title-meta { color: #6b7ea8; font-size: 0.82rem; }
+
+  /* Table header text — override Bootstrap/theme specificity */
+  .t2-table th { color: #0D2557 !important; }
+
+  /* Accent rule between title and body */
+  .quarto-title-block + hr, hr {
+    border: none;
+    border-top: 2px solid #32dbce;
+    opacity: 1;
+    margin: 1rem 0 1.4rem;
+  }
+
+  /* Intro paragraph */
+  .quarto-document-content > p:first-of-type {
+    color: #3a4f7a;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+</style>
+```
+
+This document presents three interactive views of 12 recommendations for improving research reproducibility across five stakeholder groups and four thematic categories. The stakeholder responsibility matrix lets you filter by category or stakeholder and click recommendation chips to expand their full descriptions, the stakeholder–recommendation network graph shows the same relationships as connected nodes with click-to-view details below, and the priority × effort matrix offers a strategic lens for scanning expected impact against implementation complexity.
+
+### Contents
+
+1. [Stakeholder Responsibility Matrix](#stakeholder-responsibility-matrix)
+2. [Stakeholder–Recommendation Network](#stakeholderrecommendation-network)
+3. [Priority × Effort Matrix](#priority-effort-matrix)
+
+---
+
+## Stakeholder Responsibility Matrix
+
+
+
+```{r}
+#| label: setup
+
+library(readxl)
+library(visNetwork)
+library(htmlwidgets)
+library(htmltools)
+library(jsonlite)
+
+# Locate the folder from anywhere inside the repository. This also handles an
+# RStudio session whose working directory is still 03_archive_sandbox.
+find_content_dir <- function(folder, marker) {
+  current <- normalizePath(getwd(), mustWork = TRUE)
+
+  repeat {
+    candidates <- unique(c(current, file.path(current, folder)))
+    match <- candidates[file.exists(file.path(candidates, marker))]
+
+    if (length(match) > 0) {
+      return(normalizePath(match[[1]], mustWork = TRUE))
+    }
+
+    parent <- dirname(current)
+    if (identical(parent, current)) break
+    current <- parent
+  }
+
+  stop("Could not locate ", folder, ". Open TIER2_recommendations.Rproj and try again.")
+}
+
+interactive_dir <- find_content_dir(
+  "02_interactive_plots",
+  "TIER2_stakeholder_matrix.qmd"
+)
+
+interactive_path <- function(...) file.path(interactive_dir, ...)
+
+df <- read_excel(interactive_path("TIER2_recommendations.xlsx")) |>
+  setNames(c("id", "title", "description", "category", "stakeholder"))
+
+priority_ratings <- read.csv(
+  interactive_path("TIER2_priority_effort_ratings.csv"),
+  stringsAsFactors = FALSE
+)
+df$id_key <- sub("\\.+$", "", trimws(as.character(df$id)))
+priority_ratings$id_key <- sub("\\.+$", "", trimws(as.character(priority_ratings$id)))
+priority_ratings$impact_rating <- as.numeric(priority_ratings$impact_rating)
+priority_ratings$complexity_rating <- as.numeric(priority_ratings$complexity_rating)
+
+strategic_df <- merge(
+  df,
+  priority_ratings[, c("id_key", "impact_rating", "complexity_rating")],
+  by = "id_key",
+  all.x = TRUE,
+  sort = FALSE
+)
+
+scale_to_pct <- function(x) ((x - 1) / 4) * 100
+
+strategic_df$impact_score <- scale_to_pct(strategic_df$impact_rating)
+strategic_df$complexity_score <- scale_to_pct(strategic_df$complexity_rating)
+strategic_df$quadrant <- ifelse(
+  strategic_df$impact_score >= 50 & strategic_df$complexity_score < 50,
+  "Quick wins",
+  ifelse(
+    strategic_df$impact_score >= 50 & strategic_df$complexity_score >= 50,
+    "Strategic investments",
+    ifelse(
+      strategic_df$impact_score < 50 & strategic_df$complexity_score < 50,
+      "Low-hanging fruit",
+      "Longer-term structural shifts"
+    )
+  )
+)
+
+recs_list <- lapply(seq_len(nrow(df)), function(i) {
+  list(
+    id    = trimws(as.character(df$id[i])),
+    title = trimws(df$title[i]),
+    desc  = trimws(df$description[i]),
+    cat   = trimws(df$category[i]),
+    stks  = as.list(trimws(strsplit(trimws(df$stakeholder[i]), ";")[[1]]))
+  )
+})
+
+strategic_list <- lapply(seq_len(nrow(strategic_df)), function(i) {
+  list(
+    id = trimws(as.character(strategic_df$id[i])),
+    impact = unname(strategic_df$impact_score[i]),
+    complexity = unname(strategic_df$complexity_score[i]),
+    impact_rating = sprintf("%.1f", strategic_df$impact_rating[i]),
+    complexity_rating = sprintf("%.1f", strategic_df$complexity_rating[i]),
+    quadrant = trimws(strategic_df$quadrant[i]),
+    rationale = NA_character_
+  )
+})
+
+ojs_define(recs_raw = recs_list)
+ojs_define(strategic_raw = strategic_list)
+```
+
+```{ojs}
+//| label: matrix
+
+// ── Brand palette ────────────────────────────────────────────────────────────
+// Navy   #0D2557  |  Teal   #32dbce  |  Grey  #ebecf0  |  White  #FFFFFF
+// Four category colours are derived from the brand anchor colours.
+
+recs = recs_raw
+
+cats = [
+  {
+    label: "Infrastructure & standards",
+    match: "Infrastructure, standards and community",
+    color: "#0D2557",   // navy
+    bg:    "#dce3f0",   // light navy tint
+    tx:    "#0D2557"
+  },
+  {
+    label: "Incentives & policy",
+    match: "Incentives and policy",
+    color: "#32dbce",   // brand teal
+    bg:    "#d6f8f5",   // light teal tint
+    tx:    "#084845"    // dark teal for legibility
+  },
+  {
+    label: "Training & skills",
+    match: "Training and skills",
+    color: "#1a7fc4",   // mid-blue (between navy and teal)
+    bg:    "#daeaf8",   // light mid-blue tint
+    tx:    "#0a3358"
+  },
+  {
+    label: "Evidence-based policy",
+    match: "Evidence-based policy",
+    color: "#4E9B8E",   // muted sea-green
+    bg:    "#E3F3F0",   // light sea-green tint
+    tx:    "#1F4F49"
+  }
+]
+
+stakeholders = [
+  { name: "Funders",              icon: "💰" },
+  { name: "Publishers",           icon: "📖" },
+  { name: "Institutions",         icon: "🏛️" },
+  { name: "Research Communities", icon: "🔬" },
+  { name: "Meta-Researchers",     icon: "📊" }
+]
+
+function categoryChipStyle(cat) {
+  return `background:${cat.bg};color:${cat.tx};border-color:${cat.color}`;
+}
+
+widget = {
+  // ── Styles ───────────────────────────────────────────────────────────────
+  const style = document.createElement("style");
+  style.textContent = `
+    /* Wrapper */
+    .t2-wrap { font-family: system-ui, -apple-system, sans-serif; }
+
+    /* Legend */
+    .t2-legend      { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; align-items:center; }
+    .t2-legend-lbl  { font-size:11px; font-weight:600; color:#6b7ea8;
+                      text-transform:uppercase; letter-spacing:.6px; margin-right:4px; align-self:center; }
+    .t2-legend-item { display:inline-block; padding:4px 12px; border-radius:20px;
+                      font-size:11px; font-weight:600; border:1.5px solid transparent;
+                      cursor:pointer; transition:opacity .15s, transform .15s, box-shadow .15s; }
+    .t2-legend-item:hover { opacity:.85; transform:translateY(-1px); }
+    .t2-legend-item.active { box-shadow:0 0 0 2px #0D2557; }
+    .t2-legend-item.dim { opacity:.35; }
+
+    /* Filter controls */
+    .t2-controls    { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .t2-reset       { border:1.5px solid #c5cce0; background:#FFFFFF; color:#0D2557;
+                      border-radius:999px; padding:5px 12px; font-size:12px; font-weight:600;
+                      cursor:pointer; transition:background .15s, border-color .15s, opacity .15s; }
+    .t2-reset:hover { background:#f5f7fc; border-color:#8a99b8; }
+    .t2-reset[hidden] { display:none; }
+    .t2-filter-note { font-size:12px; color:#6b7ea8; }
+
+    /* Summary stat cards */
+    .t2-stat        { background:#ebecf0; border-radius:8px; padding:8px 16px;
+                      display:flex; align-items:baseline; gap:6px; }
+    .t2-stat-n      { font-size:22px; font-weight:700; color:#0D2557; }
+    .t2-stat-lbl    { font-size:12px; color:#6b7ea8; }
+
+    /* Table scroll container */
+    .t2-scroll      { overflow-x:auto; border:1.5px solid #ebecf0;
+                      border-radius:10px; overflow:hidden; }
+
+    /* Table */
+    .t2-table       { width:100%; border-collapse:collapse; font-size:13px; }
+
+    /* Header — navy background */
+    .t2-table thead tr { background:#0D2557; }
+    .t2-table th    { padding:12px 16px; text-align:left; font-weight:600;
+                      color:#FFFFFF; white-space:nowrap; font-size:12px;
+                      letter-spacing:.3px; border-bottom:none; transition:opacity .15s; }
+    .t2-table th:first-child { border-radius:0; }
+    .t2-table th.dim { opacity:.45; }
+    .t2-table th.active { box-shadow:inset 0 -3px 0 #32dbce; }
+
+    /* Body rows */
+    .t2-table td    { padding:10px 16px; vertical-align:top;
+                      border-bottom:1px solid #ebecf0; background:#FFFFFF;
+                      transition:opacity .15s, background .15s; }
+    .t2-table tbody tr:last-child td { border-bottom:none; }
+    .t2-table tbody tr:hover td      { background:#f0fffe; transition:background .15s; }
+    .t2-table tbody tr.row-dim td    { opacity:.35; }
+    .t2-table td.cell-dim            { opacity:.28; }
+
+    /* Stakeholder cell */
+    .t2-sth { font-weight:600; color:#0D2557; white-space:nowrap;
+               min-width:170px; background:#f5f7fc !important; }
+    .t2-sth-btn { display:inline-flex; align-items:center; border:none; background:none;
+                  padding:0; margin:0; font:inherit; color:inherit; cursor:pointer; }
+    .t2-sth-btn.active { text-decoration:underline; text-underline-offset:3px; }
+    .t2-sth-btn.dim { opacity:.45; }
+
+    /* Chips */
+    .t2-chip        { display:inline-block; padding:3px 10px; border-radius:20px;
+                      font-size:11px; font-weight:700; margin:2px;
+                      border:1.5px solid transparent; cursor:pointer;
+                      line-height:1.7; transition:opacity .15s, outline .1s; }
+    .t2-chip:hover  { opacity:.7; }
+    .t2-chip.active { outline:2.5px solid #32dbce; outline-offset:2px; }
+
+    /* Empty cell dash */
+    .t2-nil { color:#c5cce0; font-size:13px; }
+
+    /* Detail panel */
+    .t2-detail      { border-left:4px solid #32dbce; border-radius:0 10px 10px 0;
+                      padding:18px 22px; margin-top:14px; background:#FFFFFF;
+                      border-top:1.5px solid #ebecf0; border-right:1.5px solid #ebecf0;
+                      border-bottom:1.5px solid #ebecf0; }
+    .t2-detail-id   { display:inline-block; padding:2px 10px; border-radius:12px;
+                      font-size:11px; font-weight:700; margin-right:8px; }
+    .t2-stk-tag     { display:inline-block; padding:2px 10px; border-radius:12px;
+                      font-size:11px; border:1.5px solid #c5cce0;
+                      color:#0D2557; background:#ebecf0; margin:2px; font-weight:500; }
+    .t2-close       { background:none; border:none; cursor:pointer;
+                      color:#8a99b8; font-size:22px; padding:0; line-height:1; }
+    .t2-close:hover { color:#0D2557; }
+    .t2-hint        { font-size:12px; color:#8a99b8; margin-top:10px; margin-bottom:0; }
+  `;
+
+  // ── Container ────────────────────────────────────────────────────────────
+  const root = document.createElement("div");
+  root.className = "t2-wrap";
+  root.appendChild(style);
+
+  // ── Legend ───────────────────────────────────────────────────────────────
+  const legend = document.createElement("div");
+  legend.className = "t2-legend";
+  legend.innerHTML =
+    `<span class="t2-legend-lbl">Categories:</span>` +
+    cats.map(c =>
+      `<span class="t2-legend-item"
+             data-category="${c.match}"
+             style="${categoryChipStyle(c)}">
+         ${c.label}
+       </span>`
+    ).join("");
+  root.appendChild(legend);
+
+  const controls = document.createElement("div");
+  controls.className = "t2-controls";
+  controls.innerHTML = `
+    <button class="t2-reset" id="t2-reset-btn" hidden>Reset filters</button>
+    <span class="t2-filter-note" id="t2-filter-note">Click a category chip or stakeholder name to filter the matrix.</span>
+  `;
+  root.appendChild(controls);
+
+  // ── Summary stat cards ────────────────────────────────────────────────────
+  const summary = document.createElement("div");
+  summary.style.cssText = "display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px";
+  const totalRecs = recs.length;
+  const totalStks = stakeholders.length;
+  const totalCats = cats.length;
+  [
+    [`${totalRecs}`, "recommendations"],
+    [`${totalStks}`, "stakeholder groups"],
+    [`${totalCats}`, "thematic categories"]
+  ].forEach(([n, label]) => {
+    summary.innerHTML +=
+      `<div class="t2-stat">
+         <span class="t2-stat-n">${n}</span>
+         <span class="t2-stat-lbl">${label}</span>
+       </div>`;
+  });
+  root.appendChild(summary);
+
+  // ── Table ─────────────────────────────────────────────────────────────────
+  const scroll = document.createElement("div");
+  scroll.className = "t2-scroll";
+
+  const table = document.createElement("table");
+  table.className = "t2-table";
+
+  // Header row
+  const thead = document.createElement("thead");
+  const hrow = document.createElement("tr");
+  hrow.innerHTML =
+    `<th>Stakeholder</th>` +
+    cats.map(c =>
+      `<th data-category="${c.match}">
+         <span style="margin-right:7px;font-size:14px;vertical-align:middle">${({
+           "Infrastructure & standards": "🏗️",
+           "Incentives & policy": "⚖️",
+           "Training & skills": "🎓",
+           "Evidence-based policy": "🔎"
+         })[c.label]}</span>${c.label}
+       </th>`
+    ).join("");
+  thead.appendChild(hrow);
+  table.appendChild(thead);
+
+  // Body rows
+  const tbody = document.createElement("tbody");
+  stakeholders.forEach(stk => {
+    const tr = document.createElement("tr");
+    tr.dataset.stakeholder = stk.name;
+    let html = `<td class="t2-sth" data-stakeholder="${stk.name}">
+                  <button class="t2-sth-btn" data-stakeholder="${stk.name}">
+                    <span style="margin-right:7px;font-size:14px">${stk.icon}</span>${stk.name}
+                  </button>
+                </td>`;
+    cats.forEach(cat => {
+      const matching = recs.filter(r =>
+        r.cat.trim() === cat.match &&
+        r.stks.some(s => s.trim() === stk.name)
+      );
+      const content = matching.length > 0
+        ? matching.map(r =>
+            `<span class="t2-chip" data-id="${r.id}"
+                   style="${categoryChipStyle(cat)}">
+               ${r.id}
+             </span>`
+          ).join("")
+        : `<span class="t2-nil">—</span>`;
+      html += `<td class="t2-cell" data-category="${cat.match}" data-stakeholder="${stk.name}">${content}</td>`;
+    });
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  scroll.appendChild(table);
+  root.appendChild(scroll);
+
+  // ── Detail panel ──────────────────────────────────────────────────────────
+  const detail = document.createElement("div");
+  detail.className = "t2-detail";
+  detail.style.display = "none";
+  root.appendChild(detail);
+
+  // Hint
+  const hint = document.createElement("p");
+  hint.className = "t2-hint";
+  hint.textContent = "Click any recommendation chip to view its full description.";
+  root.appendChild(hint);
+
+  // ── Event handling ────────────────────────────────────────────────────────
+  let activeChip = null;
+  let activeCategory = null;
+  let activeStakeholder = null;
+
+  const resetBtn = controls.querySelector("#t2-reset-btn");
+  const filterNote = controls.querySelector("#t2-filter-note");
+
+  function clearActiveChip() {
+    if (activeChip) {
+      activeChip.classList.remove("active");
+      activeChip = null;
+    }
+  }
+
+  function renderFilterDetail(matches) {
+    const parts = [];
+    if (activeCategory) {
+      parts.push(cats.find(c => c.match === activeCategory)?.label || activeCategory);
+    }
+    if (activeStakeholder) {
+      parts.push(activeStakeholder);
+    }
+    const panelTitle = parts.length > 0
+      ? `Filtered recommendations: ${parts.join(" + ")}`
+      : "Filtered recommendations";
+    const borderColor = activeCategory
+      ? (cats.find(c => c.match === activeCategory)?.color || "#32dbce")
+      : "#32dbce";
+
+    detail.style.display = "block";
+    detail.style.borderLeftColor = borderColor;
+    detail.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">${panelTitle}</p>
+          <p style="margin:0;font-size:12px;color:#6b7ea8;line-height:1.6">${matches.length} recommendation${matches.length === 1 ? "" : "s"} match the current filter.</p>
+        </div>
+        <button class="t2-close" id="t2-close-btn">×</button>
+      </div>
+      <div>
+        ${matches.map(rec => {
+          const cat = cats.find(c => c.match === rec.cat.trim());
+          return `
+            <div style="padding:12px 0 12px 12px;border-top:1px solid #ebecf0;border-left:3px solid ${cat.color}">
+              <div style="margin-bottom:8px">
+                <span class="t2-detail-id" style="${categoryChipStyle(cat)};border:1.5px solid ${cat.color}">${rec.id}</span>
+                <span style="font-size:12px;color:#6b7ea8;font-weight:500">${cat.label}</span>
+              </div>
+              <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">${rec.title}</p>
+              <p style="margin:0 0 12px;font-size:13px;color:#3a4f7a;line-height:1.75">${rec.desc}</p>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+                <span style="font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500">Stakeholder ownership:</span>
+                ${rec.stks.map(s => `<span class="t2-stk-tag">${s.trim()}</span>`).join("")}
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+    detail.querySelector("#t2-close-btn").addEventListener("click", () => {
+      activeCategory = null;
+      activeStakeholder = null;
+      detail.style.display = "none";
+      hint.style.display = "block";
+      updateFilters();
+    });
+    hint.style.display = "none";
+  }
+
+  function updateFilters() {
+    const legendItems = legend.querySelectorAll(".t2-legend-item");
+    const headerCells = table.querySelectorAll("thead th[data-category]");
+    const bodyRows = table.querySelectorAll("tbody tr");
+    const stakeholderButtons = table.querySelectorAll(".t2-sth-btn");
+    const cells = table.querySelectorAll(".t2-cell");
+
+    legendItems.forEach(item => {
+      const matches = item.dataset.category === activeCategory;
+      item.classList.toggle("active", matches);
+      item.classList.toggle("dim", !!activeCategory && !matches);
+    });
+
+    headerCells.forEach(cell => {
+      const matches = cell.dataset.category === activeCategory;
+      cell.classList.toggle("active", matches);
+      cell.classList.toggle("dim", !!activeCategory && !matches);
+    });
+
+    stakeholderButtons.forEach(button => {
+      const matches = button.dataset.stakeholder === activeStakeholder;
+      button.classList.toggle("active", matches);
+      button.classList.toggle("dim", !!activeStakeholder && !matches);
+    });
+
+    bodyRows.forEach(row => {
+      const matchesStakeholder = !activeStakeholder || row.dataset.stakeholder === activeStakeholder;
+      row.classList.toggle("row-dim", !matchesStakeholder);
+    });
+
+    cells.forEach(cell => {
+      const matchesCategory = !activeCategory || cell.dataset.category === activeCategory;
+      const matchesStakeholder = !activeStakeholder || cell.dataset.stakeholder === activeStakeholder;
+      cell.classList.toggle("cell-dim", !(matchesCategory && matchesStakeholder));
+    });
+
+    const hasFilters = !!(activeCategory || activeStakeholder);
+    resetBtn.hidden = !hasFilters;
+
+    if (!hasFilters) {
+      filterNote.textContent = "Click a category chip or stakeholder name to filter the matrix.";
+    } else {
+      const parts = [];
+      if (activeCategory) {
+        parts.push(cats.find(c => c.match === activeCategory).label);
+      }
+      if (activeStakeholder) {
+        parts.push(activeStakeholder);
+      }
+      filterNote.textContent = `Filtered by ${parts.join(" + ")}.`;
+    }
+
+    const matches = recs.filter(rec => {
+      const matchCategory = !activeCategory || rec.cat.trim() === activeCategory;
+      const matchStakeholder = !activeStakeholder || rec.stks.some(s => s.trim() === activeStakeholder);
+      return matchCategory && matchStakeholder;
+    });
+
+    if (hasFilters) {
+      clearActiveChip();
+      renderFilterDetail(matches);
+    } else if (!activeChip) {
+      detail.style.display = "none";
+      hint.style.display = "block";
+    }
+  }
+
+  function renderDetail(rec) {
+    const cat = cats.find(c => c.match === rec.cat.trim());
+    detail.style.display = "block";
+    detail.style.borderLeftColor = cat.color;
+    detail.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <span class="t2-detail-id"
+                style="${categoryChipStyle(cat)};border:1.5px solid ${cat.color}">${rec.id}</span>
+          <span style="font-size:12px;color:#6b7ea8;font-weight:500">${cat.label}</span>
+        </div>
+        <button class="t2-close" id="t2-close-btn">×</button>
+      </div>
+      <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">
+        ${rec.title}
+      </p>
+      <p style="margin:0 0 14px;font-size:13px;color:#3a4f7a;line-height:1.75">
+        ${rec.desc}
+      </p>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+        <span style="font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500">Stakeholder ownership:</span>
+        ${rec.stks.map(s => `<span class="t2-stk-tag">${s.trim()}</span>`).join("")}
+      </div>
+    `;
+    detail.querySelector("#t2-close-btn").addEventListener("click", () => {
+      detail.style.display = "none";
+      hint.style.display = "block";
+      if (activeChip) { activeChip.classList.remove("active"); activeChip = null; }
+    });
+    hint.style.display = "none";
+    detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  legend.addEventListener("click", e => {
+    const item = e.target.closest(".t2-legend-item");
+    if (!item) return;
+    activeCategory = activeCategory === item.dataset.category ? null : item.dataset.category;
+    updateFilters();
+  });
+
+  table.addEventListener("click", e => {
+    const stakeholderButton = e.target.closest(".t2-sth-btn");
+    if (stakeholderButton) {
+      activeStakeholder = activeStakeholder === stakeholderButton.dataset.stakeholder
+        ? null
+        : stakeholderButton.dataset.stakeholder;
+      updateFilters();
+      return;
+    }
+
+    const chip = e.target.closest(".t2-chip");
+    if (!chip) return;
+
+    if (activeChip === chip) {
+      detail.style.display = "none";
+      hint.style.display = "block";
+      chip.classList.remove("active");
+      activeChip = null;
+      return;
+    }
+
+    if (activeChip) activeChip.classList.remove("active");
+    chip.classList.add("active");
+    activeChip = chip;
+
+    const rec = recs.find(r => r.id === chip.dataset.id);
+    if (rec) renderDetail(rec);
+  });
+
+  resetBtn.addEventListener("click", () => {
+    activeCategory = null;
+    activeStakeholder = null;
+    updateFilters();
+  });
+
+  updateFilters();
+
+  return root;
+}
+```
+
+---
+
+## Stakeholder–Recommendation Network
+
+This network view shows the same stakeholder–recommendation relationships from a node-link perspective. Click a recommendation node to view its full title and description below the graph.
+
+```{r}
+#| label: network-graph
+
+stakeholder_split <- strsplit(trimws(df$stakeholder), ";")
+
+stakeholder_long <- data.frame(
+  stakeholder = trimws(unlist(stakeholder_split)),
+  rec_id = rep(trimws(as.character(df$id)), lengths(stakeholder_split)),
+  stringsAsFactors = FALSE
+)
+
+stakeholder_order <- c(
+  "Funders",
+  "Publishers",
+  "Institutions",
+  "Research Communities",
+  "Meta-Researchers"
+)
+
+category_map <- setNames(trimws(df$category), trimws(as.character(df$id)))
+title_map <- setNames(trimws(df$title), trimws(as.character(df$id)))
+desc_map <- setNames(trimws(df$description), trimws(as.character(df$id)))
+
+category_styles <- list(
+  "Infrastructure, standards and community" = list(color = "#0D2557", bg = "#dce3f0", tx = "#0D2557"),
+  "Incentives and policy" = list(color = "#32dbce", bg = "#d6f8f5", tx = "#084845"),
+  "Training and skills" = list(color = "#1a7fc4", bg = "#daeaf8", tx = "#0a3358"),
+  "Evidence-based policy" = list(color = "#4E9B8E", bg = "#E3F3F0", tx = "#1F4F49")
+)
+
+edges <- data.frame(
+  from = stakeholder_long$stakeholder,
+  to = stakeholder_long$rec_id,
+  stringsAsFactors = FALSE
+)
+
+stakeholder_ids <- stakeholder_order[stakeholder_order %in% unique(stakeholder_long$stakeholder)]
+recommendation_ids <- unique(stakeholder_long$rec_id)
+
+nodes <- do.call(
+  rbind,
+  c(
+    lapply(stakeholder_ids, function(id) {
+      data.frame(
+        id = id,
+        label = id,
+        group = "Stakeholder",
+        value = 34,
+        color.background = "#0D2557",
+        color.border = "#0D2557",
+        color.highlight.background = "#32dbce",
+        color.highlight.border = "#0D2557",
+        color.hover.background = "#21437f",
+        color.hover.border = "#0D2557",
+        font.color = "#0D2557",
+        stringsAsFactors = FALSE
+      )
+    }),
+    lapply(recommendation_ids, function(id) {
+      cat_style <- category_styles[[category_map[[id]]]]
+      data.frame(
+        id = id,
+        label = id,
+        group = "Recommendation",
+        value = 18,
+        color.background = cat_style$bg,
+        color.border = cat_style$color,
+        color.highlight.background = cat_style$color,
+        color.highlight.border = cat_style$color,
+        color.hover.background = cat_style$bg,
+        color.hover.border = cat_style$color,
+        font.color = cat_style$tx,
+        stringsAsFactors = FALSE
+      )
+    })
+  )
+)
+
+node_details <- c(
+  setNames(
+    lapply(stakeholder_ids, function(id) {
+      linked <- unique(edges$to[edges$from == id])
+      linked_details <- lapply(linked, function(rec_id) {
+        list(
+          rec_id = rec_id,
+          title = title_map[[rec_id]],
+          description = desc_map[[rec_id]],
+          category = category_map[[rec_id]],
+          stakeholders = unique(edges$from[edges$to == rec_id])
+        )
+      })
+      list(
+        type = "stakeholder",
+        title = id,
+        description = paste0("Connected recommendations: ", paste(linked, collapse = ", ")),
+        recommendations = linked_details
+      )
+    }),
+    stakeholder_ids
+  ),
+  setNames(
+    lapply(recommendation_ids, function(id) {
+      list(
+        type = "recommendation",
+        title = title_map[[id]],
+        description = desc_map[[id]],
+        rec_id = id,
+        category = category_map[[id]],
+        stakeholders = unique(edges$from[edges$to == id])
+      )
+    }),
+    recommendation_ids
+  )
+)
+
+network_detail_id <- "t2-network-detail"
+network_filter_id <- "t2-network-filters"
+node_details_json <- toJSON(node_details, auto_unbox = TRUE)
+category_styles_json <- toJSON(category_styles, auto_unbox = TRUE)
+network_filter_meta <- c(
+  setNames(
+    lapply(stakeholder_ids, function(id) {
+      list(
+        type = "stakeholder",
+        stakeholder = id,
+        linked_recommendations = unique(edges$to[edges$from == id])
+      )
+    }),
+    stakeholder_ids
+  ),
+  setNames(
+    lapply(recommendation_ids, function(id) {
+      list(
+        type = "recommendation",
+        category = category_map[[id]],
+        stakeholders = unique(edges$from[edges$to == id])
+      )
+    }),
+    recommendation_ids
+  )
+)
+network_filter_meta_json <- toJSON(network_filter_meta, auto_unbox = TRUE)
+network_default_html <- paste0(
+  '<div style="border-left:4px solid #32dbce;border-radius:0 10px 10px 0;padding:18px 22px;background:#FFFFFF;border-top:1.5px solid #ebecf0;border-right:1.5px solid #ebecf0;border-bottom:1.5px solid #ebecf0;">',
+  '<p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">Select a node</p>',
+  '<p style="margin:0;font-size:13px;color:#3a4f7a;line-height:1.75">Click a recommendation node to display its title and full description here. Stakeholder nodes show the recommendations linked to that stakeholder.</p>',
+  '</div>'
+)
+
+network_event_js <- sprintf(
+  "
+  function(params) {
+    const detail = document.getElementById('%s');
+    if (!detail) return;
+    const nodeDetails = %s;
+    const categoryStyles = %s;
+    const defaultHtml = %s;
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\\\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function categoryStyle(category) {
+      return categoryStyles[category] || { color: '#32dbce', bg: '#ebecf0', tx: '#0D2557' };
+    }
+
+    function asArray(value) {
+      if (Array.isArray(value)) return value;
+      if (value === null || value === undefined) return [];
+      return [value];
+    }
+
+    function renderDefault() {
+      detail.innerHTML = defaultHtml;
+    }
+
+    if (!params.nodes || params.nodes.length === 0) {
+      renderDefault();
+      return;
+    }
+
+    const meta = nodeDetails[params.nodes[0]];
+    if (!meta) {
+      renderDefault();
+      return;
+    }
+
+    if (meta.type === 'recommendation') {
+      const catStyle = categoryStyle(meta.category);
+      detail.innerHTML = `
+        <div style=\"border-left:4px solid ${escapeHtml(catStyle.color)};border-radius:0 10px 10px 0;padding:18px 22px;background:#FFFFFF;border-top:1.5px solid #ebecf0;border-right:1.5px solid #ebecf0;border-bottom:1.5px solid #ebecf0;\">
+          <div style=\"margin-bottom:10px\">
+            <span style=\"display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;margin-right:8px;border:1.5px solid ${escapeHtml(catStyle.color)};color:${escapeHtml(catStyle.tx)};background:${escapeHtml(catStyle.bg)};\">${escapeHtml(meta.rec_id)}</span>
+            <span style=\"font-size:12px;color:#6b7ea8;font-weight:500\">${escapeHtml(meta.category)}</span>
+          </div>
+          <p style=\"margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45\">${escapeHtml(meta.title)}</p>
+          <p style=\"margin:0 0 12px;font-size:13px;color:#3a4f7a;line-height:1.75\">${escapeHtml(meta.description)}</p>
+          <div style=\"display:flex;flex-wrap:wrap;gap:4px;align-items:center\">
+            <span style=\"font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500\">Stakeholder ownership:</span>
+            ${asArray(meta.stakeholders).map(function(stk) {
+              return `<span style=\"display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;border:1.5px solid #c5cce0;color:#0D2557;background:#ebecf0;margin:2px;font-weight:500;\">${escapeHtml(stk)}</span>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      const recs = (meta.recommendations || []).map(function(rec) {
+        const catStyle = categoryStyle(rec.category);
+        return `
+          <div style=\"padding:12px 0 12px 12px;border-top:1px solid #ebecf0;border-left:3px solid ${escapeHtml(catStyle.color)};\">
+            <div style=\"margin-bottom:6px\">
+              <span style=\"display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;margin-right:8px;border:1.5px solid ${escapeHtml(catStyle.color)};color:${escapeHtml(catStyle.tx)};background:${escapeHtml(catStyle.bg)};\">${escapeHtml(rec.rec_id)}</span>
+              <span style=\"font-size:12px;color:#6b7ea8;font-weight:500\">${escapeHtml(rec.category)}</span>
+            </div>
+            <p style=\"margin:0 0 6px;font-size:14px;font-weight:600;color:#0D2557;line-height:1.45\">${escapeHtml(rec.title)}</p>
+            <p style=\"margin:0 0 10px;font-size:13px;color:#3a4f7a;line-height:1.75\">${escapeHtml(rec.description)}</p>
+            <div style=\"display:flex;flex-wrap:wrap;gap:4px;align-items:center\">
+              <span style=\"font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500\">Stakeholder ownership:</span>
+              ${asArray(rec.stakeholders).map(function(stk) {
+                return `<span style=\"display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;border:1.5px solid #c5cce0;color:#0D2557;background:#ebecf0;margin:2px;font-weight:500;\">${escapeHtml(stk)}</span>`;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      detail.innerHTML = `
+        <div style=\"border-left:4px solid #0D2557;border-radius:0 10px 10px 0;padding:18px 22px;background:#FFFFFF;border-top:1.5px solid #ebecf0;border-right:1.5px solid #ebecf0;border-bottom:1.5px solid #ebecf0;\">
+          <p style=\"margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45\">${escapeHtml(meta.title)}</p>
+          <p style=\"margin:0 0 12px;font-size:13px;color:#3a4f7a;line-height:1.75\">${escapeHtml(meta.description)}</p>
+          <div>${recs}</div>
+        </div>
+      `;
+    }
+  }
+  ",
+  network_detail_id,
+  node_details_json,
+  category_styles_json,
+  toJSON(network_default_html, auto_unbox = TRUE)
+)
+
+network_widget <- visNetwork(nodes, edges, height = "650px", width = "100%") |>
+  visNodes(
+    shape = "dot",
+    borderWidth = 2,
+    shadow = list(enabled = FALSE)
+  ) |>
+  visEdges(
+    color = list(color = "#c5cce0", highlight = "#32dbce", hover = "#32dbce"),
+    width = 1.4,
+    smooth = FALSE
+  ) |>
+  visGroups(
+    groupname = "Stakeholder",
+    shape = "dot"
+  ) |>
+  visGroups(
+    groupname = "Recommendation",
+    shape = "dot"
+  ) |>
+  visOptions(highlightNearest = TRUE) |>
+  visInteraction(navigationButtons = TRUE, keyboard = TRUE) |>
+  visEvents(
+    selectNode = network_event_js,
+    deselectNode = sprintf(
+      "function(params) { var detail = document.getElementById('%s'); if (detail) detail.innerHTML = %s; }",
+      network_detail_id,
+      toJSON(network_default_html, auto_unbox = TRUE)
+    )
+  ) |>
+  onRender(
+    sprintf(
+      "
+      function(el, x) {
+        const filterRoot = document.getElementById('%s');
+        if (!filterRoot) return;
+
+        const nodeMeta = %s;
+        const graphEl = document.getElementById('graph' + el.id);
+        if (!graphEl || !graphEl.chart) return;
+        const network = graphEl.chart;
+        const nodes = graphEl.nodes;
+        const edges = graphEl.edges;
+
+        let activeCategory = null;
+        let activeStakeholder = null;
+
+        function recMatches(meta) {
+          const categoryOk = !activeCategory || meta.category === activeCategory;
+          const stakeholderOk = !activeStakeholder || (meta.stakeholders || []).includes(activeStakeholder);
+          return categoryOk && stakeholderOk;
+        }
+
+        function visibleRecommendationIds() {
+          return Object.entries(nodeMeta)
+            .filter(([id, meta]) => meta.type === 'recommendation' && recMatches(meta))
+            .map(([id]) => id);
+        }
+
+        function visibleStakeholderIds(recommendationIds) {
+          return Object.entries(nodeMeta)
+            .filter(([id, meta]) => {
+              if (meta.type !== 'stakeholder') return false;
+              if (activeStakeholder && meta.stakeholder !== activeStakeholder) return false;
+              return (meta.linked_recommendations || []).some(recId => recommendationIds.includes(recId));
+            })
+            .map(([id]) => id);
+        }
+
+        function updateControls() {
+          filterRoot.querySelectorAll('[data-network-category]').forEach(item => {
+            const match = item.dataset.networkCategory === activeCategory;
+            item.classList.toggle('active', match);
+            item.classList.toggle('dim', !!activeCategory && !match);
+          });
+          filterRoot.querySelectorAll('[data-network-stakeholder]').forEach(item => {
+            const match = item.dataset.networkStakeholder === activeStakeholder;
+            item.classList.toggle('active', match);
+            item.classList.toggle('dim', !!activeStakeholder && !match);
+          });
+          const hasFilters = !!(activeCategory || activeStakeholder);
+          const reset = filterRoot.querySelector('#t2-network-reset');
+          const note = filterRoot.querySelector('#t2-network-note');
+          reset.hidden = !hasFilters;
+          if (!hasFilters) {
+            note.textContent = 'Click a category or stakeholder chip to filter the network.';
+          } else {
+            const parts = [];
+            if (activeCategory) {
+              const activeLabel = filterRoot.querySelector('[data-network-category=\"' + activeCategory.replace(/\"/g, '\\\\\"') + '\"]')?.textContent?.trim();
+              if (activeLabel) parts.push(activeLabel);
+            }
+            if (activeStakeholder) parts.push(activeStakeholder);
+            note.textContent = 'Filtered by ' + parts.join(' + ') + '.';
+          }
+        }
+
+        function applyFilter() {
+          const recommendationIds = visibleRecommendationIds();
+          const stakeholderIds = visibleStakeholderIds(recommendationIds);
+          const visibleIds = new Set(recommendationIds.concat(stakeholderIds));
+
+          nodes.get().forEach(node => {
+            nodes.update({ id: node.id, hidden: !visibleIds.has(node.id) });
+          });
+          edges.get().forEach(edge => {
+            const fromVisible = visibleIds.has(edge.from);
+            const toVisible = visibleIds.has(edge.to);
+            edges.update({ id: edge.id, hidden: !(fromVisible && toVisible) });
+          });
+
+          updateControls();
+          network.fit({ animation: { duration: 250, easingFunction: 'easeInOutQuad' } });
+        }
+
+        filterRoot.addEventListener('click', function(e) {
+          const categoryChip = e.target.closest('[data-network-category]');
+          if (categoryChip) {
+            activeStakeholder = null;
+            activeCategory = activeCategory === categoryChip.dataset.networkCategory ? null : categoryChip.dataset.networkCategory;
+            applyFilter();
+            return;
+          }
+          const stakeholderChip = e.target.closest('[data-network-stakeholder]');
+          if (stakeholderChip) {
+            activeCategory = null;
+            activeStakeholder = activeStakeholder === stakeholderChip.dataset.networkStakeholder ? null : stakeholderChip.dataset.networkStakeholder;
+            applyFilter();
+            return;
+          }
+          const reset = e.target.closest('#t2-network-reset');
+          if (reset) {
+            activeCategory = null;
+            activeStakeholder = null;
+            applyFilter();
+          }
+        });
+
+        updateControls();
+      }
+      ",
+      network_filter_id,
+      network_filter_meta_json
+    )
+  ) |>
+  visPhysics(
+    solver = "forceAtlas2Based",
+    forceAtlas2Based = list(gravitationalConstant = -45, centralGravity = 0.01, springLength = 140),
+    stabilization = list(iterations = 150)
+  )
+
+tagList(
+  tags$style(HTML("
+    .t2-network-controls { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+    .t2-network-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .t2-network-lbl { font-size:11px; font-weight:600; color:#6b7ea8; text-transform:uppercase; letter-spacing:.6px; margin-right:4px; }
+    .t2-network-chip, .t2-network-filter {
+      display:inline-block; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:600;
+      border:1.5px solid transparent; cursor:pointer; transition:opacity .15s, transform .15s, box-shadow .15s;
+    }
+    .t2-network-filter { background:#f7f9fc; color:#3a4f7a; border-color:#d8e0ef; }
+    .t2-network-chip:hover, .t2-network-filter:hover { opacity:.85; transform:translateY(-1px); }
+    .t2-network-chip.active, .t2-network-filter.active { box-shadow:0 0 0 2px #0D2557; }
+    .t2-network-chip.dim, .t2-network-filter.dim { opacity:.35; }
+    .t2-network-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .t2-network-reset {
+      border:1.5px solid #c5cce0; background:#FFFFFF; color:#0D2557; border-radius:999px;
+      padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer;
+    }
+    .t2-network-reset[hidden] { display:none; }
+    .t2-network-note { font-size:12px; color:#6b7ea8; }
+  ")),
+  tags$div(
+    id = network_filter_id,
+    class = "t2-network-controls",
+    tags$div(
+      class = "t2-network-row",
+      tags$span(class = "t2-network-lbl", "Categories:"),
+      lapply(names(category_styles), function(cat_name) {
+        cat_style <- category_styles[[cat_name]]
+        label <- switch(
+          cat_name,
+          "Infrastructure, standards and community" = "Infrastructure & standards",
+          "Incentives and policy" = "Incentives & policy",
+          "Training and skills" = "Training & skills",
+          "Evidence-based policy" = "Evidence-based policy",
+          cat_name
+        )
+        tags$span(
+          class = "t2-network-chip",
+          `data-network-category` = cat_name,
+          style = sprintf("background:%s;color:%s;border-color:%s;", cat_style$bg, cat_style$tx, cat_style$color),
+          label
+        )
+      })
+    ),
+    tags$div(
+      class = "t2-network-row",
+      tags$span(class = "t2-network-lbl", "Stakeholders:"),
+      lapply(stakeholder_ids, function(stk) {
+        tags$span(class = "t2-network-filter", `data-network-stakeholder` = stk, stk)
+      })
+    ),
+    tags$div(
+      class = "t2-network-actions",
+      tags$button(class = "t2-network-reset", id = "t2-network-reset", hidden = NA, "Reset filters"),
+      tags$span(class = "t2-network-note", id = "t2-network-note", "Click a category or stakeholder chip to filter the network.")
+    )
+  ),
+  network_widget,
+  tags$div(
+    id = network_detail_id,
+    style = "margin-top:14px;"
+  )
+)
+```
+
+---
+
+## Priority × Effort Matrix
+
+This strategic view positions each recommendation by expected impact on reproducibility outcomes and implementation complexity. It is designed for a fast decision scan: click any recommendation point to view the full title, description, and stakeholder ownership below.
+
+```{ojs}
+//| label: priority-effort-matrix
+
+stakeholderShort = ({
+  "Funders": "F",
+  "Publishers": "P",
+  "Institutions": "I",
+  "Research Communities": "RC",
+  "Meta-Researchers": "MR"
+})
+
+strategicScores = strategic_raw
+
+strategicRecs = strategicScores.map(score => {
+  const rec = recs.find(r => r.id === score.id)
+  const cat = cats.find(c => c.match === rec.cat.trim())
+  return {
+    ...score,
+    ...rec,
+    category: cat,
+    owners: rec.stks.map(s => s.trim()),
+    ownerShort: rec.stks.map(s => stakeholderShort[s.trim()] || s.trim()).join(" · ")
+  }
+})
+
+strategicGroups = {
+  const grouped = new Map()
+  for (const rec of strategicRecs) {
+    const key = `${rec.impact}-${rec.complexity}`
+    if (!grouped.has(key)) grouped.set(key, [])
+    grouped.get(key).push(rec.id)
+  }
+  return grouped
+}
+
+strategicOffsetMap = {
+  const offsets = new Map()
+  const patterns = {
+    1: [[0, 0]],
+    2: [[-16, -12], [16, 12]],
+    3: [[0, -18], [-18, 14], [18, 14]],
+    4: [[-18, -18], [18, -18], [-18, 18], [18, 18]]
+  }
+  strategicGroups.forEach((ids, key) => {
+    const pattern = patterns[ids.length] || ids.map((_, i) => [((i % 3) - 1) * 16, (Math.floor(i / 3) - 0.5) * 18])
+    ids.forEach((id, index) => {
+      offsets.set(id, pattern[index] || [0, 0])
+    })
+  })
+  return offsets
+}
+
+strategicWidget = {
+  const style = document.createElement("style")
+  style.textContent = `
+    .t2-pr-wrap { font-family: system-ui, -apple-system, sans-serif; }
+    .t2-pr-legend { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 12px; align-items:center; }
+    .t2-pr-legend-lbl { font-size:11px; font-weight:600; color:#6b7ea8;
+                        text-transform:uppercase; letter-spacing:.6px; margin-right:4px; }
+    .t2-pr-legend-item { display:inline-block; padding:4px 12px; border-radius:20px;
+                         font-size:11px; font-weight:600; border:1.5px solid transparent;
+                         cursor:pointer; transition:opacity .15s, transform .15s, box-shadow .15s; }
+    .t2-pr-legend-item:hover { opacity:.85; transform:translateY(-1px); }
+    .t2-pr-legend-item.active { box-shadow:0 0 0 2px #0D2557; }
+    .t2-pr-legend-item.dim { opacity:.35; }
+    .t2-pr-controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; }
+    .t2-pr-reset { border:1.5px solid #c5cce0; background:#FFFFFF; color:#0D2557;
+                   border-radius:999px; padding:5px 12px; font-size:12px; font-weight:600;
+                   cursor:pointer; transition:background .15s, border-color .15s, opacity .15s; }
+    .t2-pr-reset:hover { background:#f5f7fc; border-color:#8a99b8; }
+    .t2-pr-reset[hidden] { display:none; }
+    .t2-pr-filter-note { font-size:12px; color:#6b7ea8; }
+    .t2-pr-sublegend { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 12px; align-items:center; }
+    .t2-pr-sublegend-item { display:inline-block; padding:4px 10px; border-radius:999px; font-size:11px;
+                            font-weight:600; border:1.5px solid #d8e0ef; color:#3a4f7a; background:#f7f9fc;
+                            cursor:pointer; transition:opacity .15s, transform .15s, box-shadow .15s; }
+    .t2-pr-sublegend-item:hover { opacity:.85; transform:translateY(-1px); }
+    .t2-pr-sublegend-item.active { box-shadow:0 0 0 2px #0D2557; }
+    .t2-pr-sublegend-item.dim { opacity:.35; }
+    .t2-pr-frame { border:1.5px solid #ebecf0; border-radius:12px; background:#FFFFFF; overflow:hidden; }
+    .t2-pr-svg { display:block; width:100%; height:auto; background:#FFFFFF; }
+    .t2-pr-axis { font-size:12px; fill:#0D2557; font-weight:600; }
+    .t2-pr-caption { font-size:11px; fill:#6b7ea8; }
+    .t2-pr-quad { font-size:14px; font-weight:700; fill:#b5bfd6; }
+    .t2-pr-point { cursor:pointer; transition:opacity .15s, transform .15s; }
+    .t2-pr-point:hover .t2-pr-dot { opacity:.9; }
+    .t2-pr-dot { stroke-width:2.5; }
+    .t2-pr-id { font-size:12px; font-weight:700; fill:#0D2557; text-anchor:middle; pointer-events:none; }
+    .t2-pr-own { font-size:10px; fill:#6b7ea8; text-anchor:middle; pointer-events:none; }
+    .t2-pr-point.active .t2-pr-dot { stroke:#0D2557; stroke-width:3.5; }
+    .t2-pr-point.active .t2-pr-id { fill:#0D2557; }
+    .t2-pr-point.dim { opacity:.22; }
+    .t2-pr-hint { font-size:12px; color:#8a99b8; margin-top:10px; margin-bottom:0; }
+    .t2-pr-detail { border-left:4px solid #32dbce; border-radius:0 10px 10px 0;
+                    padding:18px 22px; margin-top:14px; background:#FFFFFF;
+                    border-top:1.5px solid #ebecf0; border-right:1.5px solid #ebecf0;
+                    border-bottom:1.5px solid #ebecf0; display:none; }
+    .t2-pr-chip { display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px;
+                  font-weight:700; margin-right:8px; border:1.5px solid transparent; }
+    .t2-pr-owner { display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px;
+                   border:1.5px solid #c5cce0; color:#0D2557; background:#ebecf0; margin:2px; font-weight:500; }
+    .t2-pr-close { background:none; border:none; cursor:pointer; color:#8a99b8; font-size:22px; padding:0; line-height:1; }
+    .t2-pr-close:hover { color:#0D2557; }
+  `
+
+  const root = document.createElement("div")
+  root.className = "t2-pr-wrap"
+  root.appendChild(style)
+
+  const legend = document.createElement("div")
+  legend.className = "t2-pr-legend"
+  legend.innerHTML =
+    `<span class="t2-pr-legend-lbl">Categories:</span>` +
+    cats.map(c =>
+      `<span class="t2-pr-legend-item" data-category="${c.match}" style="background:${c.bg};color:${c.tx};border-color:${c.color}">
+         ${c.label}
+       </span>`
+    ).join("")
+  root.appendChild(legend)
+
+  const controls = document.createElement("div")
+  controls.className = "t2-pr-controls"
+  controls.innerHTML = `
+    <button class="t2-pr-reset" id="t2-pr-reset" hidden>Reset filters</button>
+    <span class="t2-pr-filter-note" id="t2-pr-filter-note">Click a category chip to highlight recommendations in that category.</span>
+  `
+  root.appendChild(controls)
+
+  const stakeholderLegend = document.createElement("div")
+  stakeholderLegend.className = "t2-pr-sublegend"
+  stakeholderLegend.innerHTML = `
+    <span class="t2-pr-legend-lbl">Stakeholder Codes:</span>
+    <span class="t2-pr-sublegend-item" data-stakeholder="Funders">F = Funders</span>
+    <span class="t2-pr-sublegend-item" data-stakeholder="Publishers">P = Publishers</span>
+    <span class="t2-pr-sublegend-item" data-stakeholder="Institutions">I = Institutions</span>
+    <span class="t2-pr-sublegend-item" data-stakeholder="Research Communities">RC = Research Communities</span>
+    <span class="t2-pr-sublegend-item" data-stakeholder="Meta-Researchers">MR = Meta-Researchers</span>
+  `
+  root.appendChild(stakeholderLegend)
+
+  const frame = document.createElement("div")
+  frame.className = "t2-pr-frame"
+
+  const svgNS = "http://www.w3.org/2000/svg"
+  const svg = document.createElementNS(svgNS, "svg")
+  svg.setAttribute("viewBox", "0 0 980 680")
+  svg.setAttribute("class", "t2-pr-svg")
+
+  const chart = { left: 150, right: 910, top: 90, bottom: 540 }
+  const width = chart.right - chart.left
+  const height = chart.bottom - chart.top
+  const xScale = v => chart.left + (v / 100) * width
+  const yScale = v => chart.bottom - (v / 100) * height
+  const bubbleInsetX = width * 0.10
+  const bubbleInsetY = height * 0.10
+  const bubbleLeft = chart.left + bubbleInsetX
+  const bubbleRight = chart.right - bubbleInsetX
+  const bubbleTop = chart.top + bubbleInsetY
+  const bubbleBottom = chart.bottom - bubbleInsetY
+  const bubbleWidth = bubbleRight - bubbleLeft
+  const bubbleHeight = bubbleBottom - bubbleTop
+  const xBubbleScale = v => bubbleLeft + (v / 100) * bubbleWidth
+  const yBubbleScale = v => bubbleBottom - (v / 100) * bubbleHeight
+
+  const plotClip = document.createElementNS(svgNS, "clipPath")
+  plotClip.setAttribute("id", "t2-pr-clip")
+  const plotClipRect = document.createElementNS(svgNS, "rect")
+  plotClipRect.setAttribute("x", chart.left)
+  plotClipRect.setAttribute("y", chart.top)
+  plotClipRect.setAttribute("width", width)
+  plotClipRect.setAttribute("height", height)
+  plotClip.appendChild(plotClipRect)
+
+  const defs = document.createElementNS(svgNS, "defs")
+  defs.appendChild(plotClip)
+  svg.appendChild(defs)
+
+  const gridLayer = document.createElementNS(svgNS, "g")
+  gridLayer.setAttribute("clip-path", "url(#t2-pr-clip)")
+  svg.appendChild(gridLayer)
+
+  function addText(x, y, text, cls, anchor = "start", rotate = null) {
+    const el = document.createElementNS(svgNS, "text")
+    el.setAttribute("x", x)
+    el.setAttribute("y", y)
+    el.setAttribute("class", cls)
+    el.setAttribute("text-anchor", anchor)
+    if (rotate !== null) el.setAttribute("transform", `rotate(${rotate} ${x} ${y})`)
+    el.textContent = text
+    svg.appendChild(el)
+    return el
+  }
+
+  const axisColor = "#8a99b8"
+  ;[
+    { x1: chart.left, y1: chart.bottom, x2: chart.right, y2: chart.bottom },
+    { x1: chart.left, y1: chart.top, x2: chart.left, y2: chart.bottom }
+  ].forEach(line => {
+    const el = document.createElementNS(svgNS, "line")
+    Object.entries(line).forEach(([k, v]) => el.setAttribute(k, v))
+    el.setAttribute("stroke", axisColor)
+    el.setAttribute("stroke-width", "2")
+    svg.appendChild(el)
+  })
+
+  ;[25, 50, 75].forEach(v => {
+    const x = xScale(v)
+    const y = yScale(v)
+    const vLine = document.createElementNS(svgNS, "line")
+    vLine.setAttribute("x1", x)
+    vLine.setAttribute("x2", x)
+    vLine.setAttribute("y1", chart.top)
+    vLine.setAttribute("y2", chart.bottom)
+    vLine.setAttribute("stroke", "#eef2f8")
+    vLine.setAttribute("stroke-width", "1")
+    gridLayer.appendChild(vLine)
+
+    const hLine = document.createElementNS(svgNS, "line")
+    hLine.setAttribute("x1", chart.left)
+    hLine.setAttribute("x2", chart.right)
+    hLine.setAttribute("y1", y)
+    hLine.setAttribute("y2", y)
+    hLine.setAttribute("stroke", "#eef2f8")
+    hLine.setAttribute("stroke-width", "1")
+    gridLayer.appendChild(hLine)
+  })
+
+addText((chart.left + chart.right) / 2, 630, "Implementation effort", "t2-pr-axis", "middle")
+addText((chart.left + chart.right) / 2, 653, "From lower effort and resource requirements to greater delivery complexity, coordination needs and longer implementation timeframes", "t2-pr-caption", "middle")
+addText(38, (chart.top + chart.bottom) / 2, "Strategic priority for improving reproducibility outcomes", "t2-pr-axis", "middle", -90)
+addText(18, (chart.top + chart.bottom) / 2, "From lower to higher strategic priority", "t2-pr-caption", "middle", -90)
+
+  let activePoint = null
+  let activeCategory = null
+  let activeStakeholder = null
+  const pointEntries = []
+  const resetBtn = controls.querySelector("#t2-pr-reset")
+  const filterNote = controls.querySelector("#t2-pr-filter-note")
+
+  const detail = document.createElement("div")
+  detail.className = "t2-pr-detail"
+
+  const hint = document.createElement("p")
+  hint.className = "t2-pr-hint"
+  hint.textContent = "Click any recommendation point to view its full description and stakeholder ownership."
+
+  function clearActivePoint() {
+    if (activePoint) {
+      activePoint.classList.remove("active")
+      activePoint = null
+    }
+  }
+
+  function renderDetail(rec) {
+    detail.style.display = "block"
+    detail.style.borderLeftColor = rec.category.color
+    detail.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <span class="t2-pr-chip" style="background:${rec.category.bg};color:${rec.category.tx};border-color:${rec.category.color}">
+            ${rec.id}
+          </span>
+          <span style="font-size:12px;color:#6b7ea8;font-weight:500">${rec.category.label} · ${rec.quadrant}</span>
+        </div>
+        <button class="t2-pr-close" id="t2-pr-close">×</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px">
+        <span class="t2-pr-owner">Impact: ${rec.impact_rating}</span>
+        <span class="t2-pr-owner">Complexity: ${rec.complexity_rating}</span>
+      </div>
+      <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">${rec.title}</p>
+      <p style="margin:0 0 14px;font-size:13px;color:#3a4f7a;line-height:1.75">${rec.desc}</p>
+      ${rec.rationale && rec.rationale !== "NA" ? `<p style="margin:0 0 14px;font-size:13px;color:#3a4f7a;line-height:1.75"><strong style="color:#0D2557">Rationale:</strong> ${rec.rationale}</p>` : ""}
+      <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+        <span style="font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500">Stakeholder ownership:</span>
+        ${rec.owners.map(owner => `<span class="t2-pr-owner">${owner}</span>`).join("")}
+      </div>
+    `
+    detail.querySelector("#t2-pr-close").addEventListener("click", () => {
+      detail.style.display = "none"
+      hint.style.display = "block"
+      clearActivePoint()
+    })
+    hint.style.display = "none"
+  }
+
+  function renderFilterDetail(matches) {
+    const filterParts = []
+    if (activeCategory) {
+      filterParts.push(cats.find(c => c.match === activeCategory)?.label || activeCategory)
+    }
+    if (activeStakeholder) {
+      filterParts.push(activeStakeholder)
+    }
+    const title = filterParts.length > 0 ? `Filtered recommendations: ${filterParts.join(" + ")}` : "Filtered recommendations"
+
+    detail.style.display = "block"
+    detail.style.borderLeftColor = activeCategory
+      ? (cats.find(c => c.match === activeCategory)?.color || "#32dbce")
+      : "#32dbce"
+    detail.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">${title}</p>
+          <p style="margin:0;font-size:12px;color:#6b7ea8;line-height:1.6">${matches.length} recommendation${matches.length === 1 ? "" : "s"} match the current filter.</p>
+        </div>
+        <button class="t2-pr-close" id="t2-pr-close">×</button>
+      </div>
+      <div>
+        ${matches.map(rec => `
+          <div style="padding:12px 0 12px 12px;border-top:1px solid #ebecf0;border-left:3px solid ${rec.category.color};">
+            <div style="margin-bottom:8px">
+              <span class="t2-pr-chip" style="background:${rec.category.bg};color:${rec.category.tx};border-color:${rec.category.color}">${rec.id}</span>
+              <span style="font-size:12px;color:#6b7ea8;font-weight:500">${rec.category.label} · ${rec.quadrant}</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px">
+              <span class="t2-pr-owner">Impact: ${rec.impact_rating}</span>
+              <span class="t2-pr-owner">Complexity: ${rec.complexity_rating}</span>
+            </div>
+            <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">${rec.title}</p>
+            <p style="margin:0 0 10px;font-size:13px;color:#3a4f7a;line-height:1.75">${rec.desc}</p>
+            ${rec.rationale && rec.rationale !== "NA" ? `<p style="margin:0 0 10px;font-size:13px;color:#3a4f7a;line-height:1.75"><strong style="color:#0D2557">Rationale:</strong> ${rec.rationale}</p>` : ""}
+            <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+              <span style="font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500">Stakeholder ownership:</span>
+              ${rec.owners.map(owner => `<span class="t2-pr-owner">${owner}</span>`).join("")}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `
+    detail.querySelector("#t2-pr-close").addEventListener("click", () => {
+      activeCategory = null
+      activeStakeholder = null
+      detail.style.display = "none"
+      hint.style.display = "block"
+      updateCategoryFilter()
+    })
+    hint.style.display = "none"
+  }
+
+  function updateCategoryFilter() {
+    const legendItems = legend.querySelectorAll(".t2-pr-legend-item")
+    const stakeholderItems = stakeholderLegend.querySelectorAll(".t2-pr-sublegend-item[data-stakeholder]")
+    legendItems.forEach(item => {
+      const match = item.dataset.category === activeCategory
+      item.classList.toggle("active", match)
+      item.classList.toggle("dim", !!activeCategory && !match)
+    })
+    stakeholderItems.forEach(item => {
+      const match = item.dataset.stakeholder === activeStakeholder
+      item.classList.toggle("active", match)
+      item.classList.toggle("dim", !!activeStakeholder && !match)
+    })
+    pointEntries.forEach(({ rec, el }) => {
+      const matchCategory = !activeCategory || rec.cat.trim() === activeCategory
+      const matchStakeholder = !activeStakeholder || rec.owners.includes(activeStakeholder)
+      el.classList.toggle("dim", !(matchCategory && matchStakeholder))
+    })
+    const hasFilters = !!(activeCategory || activeStakeholder)
+    resetBtn.hidden = !hasFilters
+    if (!hasFilters) {
+      filterNote.textContent = "Click a category chip or stakeholder code to highlight matching recommendations."
+    } else {
+      const parts = []
+      if (activeCategory) {
+        parts.push(cats.find(c => c.match === activeCategory)?.label || activeCategory)
+      }
+      if (activeStakeholder) {
+        parts.push(activeStakeholder)
+      }
+      filterNote.textContent = `Filtered by ${parts.join(" + ")}.`
+    }
+
+    const matches = strategicRecs.filter(rec => {
+      const matchCategory = !activeCategory || rec.cat.trim() === activeCategory
+      const matchStakeholder = !activeStakeholder || rec.owners.includes(activeStakeholder)
+      return matchCategory && matchStakeholder
+    })
+
+    if (hasFilters) {
+      clearActivePoint()
+      renderFilterDetail(matches)
+    } else if (!activePoint) {
+      detail.style.display = "none"
+      hint.style.display = "block"
+    }
+  }
+
+  strategicRecs.forEach(rec => {
+    const offset = strategicOffsetMap.get(rec.id) || [0, 0]
+    const x = xBubbleScale(rec.complexity) + offset[0]
+    const y = yBubbleScale(rec.impact) + offset[1]
+
+    const g = document.createElementNS(svgNS, "g")
+    g.setAttribute("class", "t2-pr-point")
+    g.setAttribute("transform", `translate(${x}, ${y})`)
+
+    const dot = document.createElementNS(svgNS, "circle")
+    dot.setAttribute("r", 17)
+    dot.setAttribute("class", "t2-pr-dot")
+    dot.setAttribute("fill", rec.category.bg)
+    dot.setAttribute("stroke", rec.category.color)
+    g.appendChild(dot)
+
+    const idText = document.createElementNS(svgNS, "text")
+    idText.setAttribute("class", "t2-pr-id")
+    idText.setAttribute("y", 4)
+    idText.textContent = rec.id.replace(/\.$/, "")
+    g.appendChild(idText)
+
+    const owners = document.createElementNS(svgNS, "text")
+    owners.setAttribute("class", "t2-pr-own")
+    owners.setAttribute("y", 33)
+    owners.textContent = rec.ownerShort
+    g.appendChild(owners)
+
+    g.addEventListener("click", () => {
+      if (activePoint) activePoint.classList.remove("active")
+      g.classList.add("active")
+      activePoint = g
+      renderDetail(rec)
+    })
+
+    svg.appendChild(g)
+    pointEntries.push({ rec, el: g })
+  })
+
+  function addQuadrantLabel(x, y, title, subtitle, anchor = "start") {
+    const titleEl = document.createElementNS(svgNS, "text")
+    titleEl.setAttribute("x", x)
+    titleEl.setAttribute("y", y)
+    titleEl.setAttribute("class", "t2-pr-quad")
+    titleEl.setAttribute("text-anchor", anchor)
+    titleEl.textContent = title
+    svg.appendChild(titleEl)
+
+    const subtitleEl = document.createElementNS(svgNS, "text")
+    subtitleEl.setAttribute("x", x)
+    subtitleEl.setAttribute("y", y + 18)
+    subtitleEl.setAttribute("class", "t2-pr-caption")
+    subtitleEl.setAttribute("text-anchor", anchor)
+    subtitleEl.textContent = subtitle
+    svg.appendChild(subtitleEl)
+  }
+
+addQuadrantLabel(chart.left + 14, chart.top + 16, "Highest priority, lower effort", "Proceed first", "start")
+addQuadrantLabel(chart.right - 14, chart.top + 16, "Highest priority, higher effort", "Sequence and resource", "end")
+addQuadrantLabel(chart.left + 14, chart.bottom - 44, "Lower priority, lower effort", "Advance where justified", "start")
+addQuadrantLabel(chart.right - 14, chart.bottom - 44, "Lower priority, higher effort", "Pursue selectively", "end")
+  legend.addEventListener("click", e => {
+    const item = e.target.closest(".t2-pr-legend-item")
+    if (!item) return
+    activeCategory = activeCategory === item.dataset.category ? null : item.dataset.category
+    updateCategoryFilter()
+  })
+
+  stakeholderLegend.addEventListener("click", e => {
+    const item = e.target.closest(".t2-pr-sublegend-item[data-stakeholder]")
+    if (!item) return
+    activeStakeholder = activeStakeholder === item.dataset.stakeholder ? null : item.dataset.stakeholder
+    updateCategoryFilter()
+  })
+
+  resetBtn.addEventListener("click", () => {
+    activeCategory = null
+    activeStakeholder = null
+    updateCategoryFilter()
+  })
+
+  frame.appendChild(svg)
+  root.appendChild(frame)
+  root.appendChild(detail)
+  root.appendChild(hint)
+  updateCategoryFilter()
+
+  return root
+}
+```
