@@ -101,7 +101,6 @@ execute:
 <div class="t2-author-list" aria-label="Authors">
   <span class="t2-author">Thomas Klebel <a class="t2-link" href="https://orcid.org/0000-0002-7331-4751" target="_blank" rel="noopener noreferrer" aria-label="Thomas Klebel ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
   <span class="t2-author">Alexandra Bannach-Brown <a class="t2-link" href="https://orcid.org/0000-0002-3161-1395" target="_blank" rel="noopener noreferrer" aria-label="Alexandra Bannach-Brown ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
-  <span class="t2-author">Liz Allen <a class="t2-link" href="https://orcid.org/0000-0002-9298-3168" target="_blank" rel="noopener noreferrer" aria-label="Liz Allen ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
   <span class="t2-author">Olavo B. Amaral <a class="t2-link" href="https://orcid.org/0000-0002-4299-8978" target="_blank" rel="noopener noreferrer" aria-label="Olavo B. Amaral ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
   <span class="t2-author">Catriona J MacCallum <a class="t2-link" href="https://orcid.org/0000-0001-9623-2225" target="_blank" rel="noopener noreferrer" aria-label="Catriona J MacCallum ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
   <span class="t2-author">Lex Bouter <a class="t2-link" href="https://orcid.org/0000-0002-2659-5482" target="_blank" rel="noopener noreferrer" aria-label="Lex Bouter ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
@@ -114,7 +113,7 @@ execute:
 
 When referring to this work, please cite it as:
 
-> Klebel, T., Bannach-Brown, A., Allen, L., Amaral, O. B., MacCallum, C. J., Bouter, L., Tijdink, J., & Ross-Hellauer, T. (2026). *Making research more reproducible: eleven paths forward* [Preprint]. **Placeholder — preprint server and DOI to be added.**
+> Klebel, T., Bannach-Brown, A., Amaral, O. B., MacCallum, C. J., Bouter, L., Tijdink, J., & Ross-Hellauer, T. (2026). *Making research more reproducible: eleven paths forward* [Preprint]. **Placeholder — preprint server and DOI to be added.**
 
 This document presents three interactive views of 11 recommendations for improving research reproducibility across five stakeholder groups and four thematic categories. The interactive spoke diagram provides a visual overview with click-to-view descriptions, the stakeholder responsibility matrix lets you filter by category or stakeholder and click recommendation chips to expand their full descriptions, the stakeholder–recommendation network graph shows the same relationships as connected nodes with click-to-view details below.
 
@@ -292,13 +291,13 @@ const spokeShortTitles = ({
   "R1.2": "Standards for data re-use",
   "R1.3": "Persistent identifiers & metadata",
   "R2.1": "Responsible reproducibility metrics",
-  "R2.2": "Fund replication studies",
+  "R2.2": "Funding of replication studies",
   "R3.1": "Training ecosystems & networks",
   "R3.2": "Leadership & researcher training",
   "R3.3": "Journal infrastructure capacity",
   "R4.1": "Efficacy of interventions",
   "R4.2": "Costs & benefits of interventions",
-  "R4.3": "Enable metaresearch workflows"
+  "R4.3": "Metaresearch workflows"
 })
 
 const spokeThemeMeta = [

@@ -66,13 +66,13 @@ recs <- read_excel(static_path("TIER2_recommendations.xlsx")) %>%
     rec_id == "R1.2" ~ "Standards for data re-use",
     rec_id == "R1.3" ~ "Persistent identifiers & metadata",
     rec_id == "R2.1" ~ "Responsible reproducibility metrics",
-    rec_id == "R2.2" ~ "Fund replication studies",
+    rec_id == "R2.2" ~ "Funding of replication studies",
     rec_id == "R3.1" ~ "Training ecosystems & networks",
     rec_id == "R3.2" ~ "Leadership & researcher training",
     rec_id == "R3.3" ~ "Journal infrastructure capacity",
     rec_id == "R4.1" ~ "Efficacy of interventions",
     rec_id == "R4.2" ~ "Costs & benefits of interventions",
-    rec_id == "R4.3" ~ "Enable metaresearch workflows"
+    rec_id == "R4.3" ~ "Metaresearch workflows"
   ))
 
 
