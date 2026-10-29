@@ -101,7 +101,6 @@ execute:
 <div class="t2-author-list" aria-label="Authors">
   <span class="t2-author">Thomas Klebel <a class="t2-link" href="https://orcid.org/0000-0002-7331-4751" target="_blank" rel="noopener noreferrer" aria-label="Thomas Klebel ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
   <span class="t2-author">Alexandra Bannach-Brown <a class="t2-link" href="https://orcid.org/0000-0002-3161-1395" target="_blank" rel="noopener noreferrer" aria-label="Alexandra Bannach-Brown ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
-  <span class="t2-author">Liz Allen <a class="t2-link" href="https://orcid.org/0000-0002-9298-3168" target="_blank" rel="noopener noreferrer" aria-label="Liz Allen ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
   <span class="t2-author">Olavo B. Amaral <a class="t2-link" href="https://orcid.org/0000-0002-4299-8978" target="_blank" rel="noopener noreferrer" aria-label="Olavo B. Amaral ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
   <span class="t2-author">Catriona J MacCallum <a class="t2-link" href="https://orcid.org/0000-0001-9623-2225" target="_blank" rel="noopener noreferrer" aria-label="Catriona J MacCallum ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
   <span class="t2-author">Lex Bouter <a class="t2-link" href="https://orcid.org/0000-0002-2659-5482" target="_blank" rel="noopener noreferrer" aria-label="Lex Bouter ORCID profile"><svg class="t2-orcid-icon" viewBox="0 0 256 256" role="img" aria-hidden="true" focusable="false"><circle cx="128" cy="128" r="128" fill="#A6CE39"/><path fill="#FFFFFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM108.9 79.1h41.6c39.6 0 57 28.3 57 53.6 0 27.5-21.5 53.5-56.8 53.5h-41.8V79.1zm15.4 93.3h24.5c34.9 0 42.7-26.5 42.7-39.7 0-21.5-13.7-39.8-43.5-39.8h-23.7v79.5zM88.7 56.8c0 5.5-4.5 10.1-10.1 10.1s-10.1-4.6-10.1-10.1 4.6-10.1 10.1-10.1 10.1 4.6 10.1 10.1z"/></svg></a></span>
@@ -114,12 +113,12 @@ execute:
 
 When referring to this work, please cite it as:
 
-> Klebel, T., Bannach-Brown, A., Allen, L., Amaral, O. B., MacCallum, C. J., Bouter, L., Tijdink, J., & Ross-Hellauer, T. (2026). *Making research more reproducible: eleven paths forward* [Preprint]. **Placeholder — preprint server and DOI to be added.**
+> Klebel, T., Bannach-Brown, A., Amaral, O. B., MacCallum, C. J., Bouter, L., Tijdink, J., & Ross-Hellauer, T. (2026). *Making research more reproducible: eleven paths forward* [Preprint, under review].
 
-This document presents three interactive views of 11 recommendations for improving research reproducibility across five stakeholder groups and four thematic categories. The interactive spoke diagram provides a visual overview with click-to-view descriptions, the stakeholder responsibility matrix lets you filter by category or stakeholder and click recommendation chips to expand their full descriptions, the stakeholder–recommendation network graph shows the same relationships as connected nodes with click-to-view details below.
+This document presents three interactive views of eleven recommendations for reproducible research, addressed to five stakeholder groups and grouped into four thematic categories. The recommendation titles and texts are those of the paper, including its numbered references, which are listed below each recommendation and at the end of this page. The interactive spoke diagram provides a visual overview with click-to-view descriptions, the stakeholder responsibility matrix lets you filter by category or stakeholder and click recommendation chips to expand their full descriptions, the stakeholder–recommendation network graph shows the same relationships as connected nodes with click-to-view details below.
 
 ```{=html}
-<p>For more information on TIER2, <a class="t2-link t2-external-link" href="https://tier2-project.eu/" target="_blank" rel="noopener noreferrer">visit the project website</a>. The source files for these visualisations are available in the <a class="t2-link t2-external-link" href="https://github.com/abannachbrown/TIER2_recommendations" target="_blank" rel="noopener noreferrer">GitHub repository</a>.</p>
+<p>The recommendations were developed in the TIER2 project, funded by the European Union’s Horizon Europe research and innovation program under grant agreement No. 101094817. For more information on TIER2, <a class="t2-link t2-external-link" href="https://tier2-project.eu/" target="_blank" rel="noopener noreferrer">visit the project website</a>. The source code and data behind this page are available in the <a class="t2-link t2-external-link" href="https://github.com/abannachbrown/TIER2_recommendations" target="_blank" rel="noopener noreferrer">GitHub repository</a>.</p>
 ```
 
 ---
@@ -161,27 +160,83 @@ interactive_dir <- find_content_dir(
 
 interactive_path <- function(...) file.path(interactive_dir, ...)
 
-df <- read_excel(interactive_path("TIER2_recommendations.xlsx")) |>
+workbook <- interactive_path("TIER2_recommendations.xlsx")
+
+# Sheet1: the eleven recommendations (titles and texts as in the paper,
+# stakeholders as in Table S1 of the supplement).
+df <- read_excel(workbook, sheet = "Sheet1") |>
   setNames(c("id", "title", "description", "category", "stakeholder"))
-
-category_label_map <- c(
-  "Infrastructure, standards and community" = "R1 Infrastructure, Standards & Community",
-  "Incentives and policy" = "R2 Incentives & Policy",
-  "Training and skills" = "R3 Training & Skills",
-  "Evidence-based policy" = "R4 Strengthening the Evidence-base"
-)
-df$category <- ifelse(
-  df$category %in% names(category_label_map),
-  unname(category_label_map[df$category]),
-  df$category
-)
-
-# Match the 11-recommendation set used by 01_publication_static: remove the
-# original R2.1 (Drive culture change), then close the numbering gap.
 df$id <- sub("\\.+$", "", trimws(as.character(df$id)))
-df <- df[df$id != "R2.1", , drop = FALSE]
-df$id[df$id == "R2.2"] <- "R2.1"
-df$id[df$id == "R2.3"] <- "R2.2"
+
+# Actions: the illustrative actions of Table S1, one row per action.
+actions_df <- read_excel(workbook, sheet = "Actions")
+# References: the paper's numbered reference list.
+refs_df <- read_excel(workbook, sheet = "References")
+ref_text <- setNames(as.character(refs_df$Reference), as.character(refs_df$Number))
+
+# Citations such as [37], [38–40], [42, 43] or [63, cf. 64] become links to
+# the reference list at the end of the page.
+cite_pattern <- "\\[((?:cf\\. )?\\d+(?:–\\d+)?(?:, (?:cf\\. )?\\d+(?:–\\d+)?)*)\\]"
+
+cited_numbers <- function(text) {
+  groups <- regmatches(text, gregexpr(cite_pattern, text, perl = TRUE))[[1]]
+  nums <- integer(0)
+  for (g in groups) {
+    for (part in strsplit(gsub("^\\[|\\]$", "", g), ", ")[[1]]) {
+      bounds <- as.integer(strsplit(sub("^cf\\. ", "", part), "–")[[1]])
+      nums <- c(nums, if (length(bounds) == 2) seq(bounds[1], bounds[2]) else bounds)
+    }
+  }
+  unique(nums)
+}
+
+link_ref <- function(n) sprintf('<a class="t2-cite" href="#t2-ref-%s">%s</a>', n, n)
+
+link_citations <- function(html) {
+  m <- gregexpr(cite_pattern, html, perl = TRUE)
+  regmatches(html, m) <- lapply(regmatches(html, m), function(groups) {
+    vapply(groups, function(g) {
+      gsub("(\\d+)", '<a class="t2-cite" href="#t2-ref-\\1">\\1</a>', g, perl = TRUE)
+    }, character(1))
+  })
+  html
+}
+
+linkify_urls <- function(html) {
+  gsub("(https?://[^ <]+[^ <.,;)])", '<a href="\\1" target="_blank" rel="noopener noreferrer">\\1</a>', html, perl = TRUE)
+}
+
+desc_to_html <- function(text) {
+  paras <- strsplit(trimws(text), "\n\\s*\n")[[1]]
+  paste0("<p>", link_citations(htmltools::htmlEscape(trimws(paras))), "</p>", collapse = "")
+}
+
+ref_list_html <- function(nums) {
+  if (length(nums) == 0) return("")
+  items <- vapply(sort(nums), function(n) {
+    sprintf('<li value="%d">%s</li>', n, linkify_urls(htmltools::htmlEscape(ref_text[[as.character(n)]])))
+  }, character(1))
+  paste0('<ol class="t2-refs">', paste(items, collapse = ""), "</ol>")
+}
+
+rec_actions <- function(id) {
+  rows <- actions_df[actions_df$No == id, , drop = FALSE]
+  lapply(unique(rows$Stakeholder), function(stk) {
+    sub_rows <- rows[rows$Stakeholder == stk, , drop = FALSE]
+    list(
+      stakeholder = stk,
+      items = lapply(seq_len(nrow(sub_rows)), function(j) {
+        list(text = sub_rows$Action[j], note = if (is.na(sub_rows$Note[j])) NA_character_ else sub_rows$Note[j])
+      })
+    )
+  })
+}
+
+df$desc_html <- vapply(df$description, desc_to_html, character(1), USE.NAMES = FALSE)
+df$cited <- lapply(df$description, cited_numbers)
+df$refs_html <- vapply(df$cited, ref_list_html, character(1))
+all_cited <- sort(unique(unlist(df$cited)))
+stopifnot(all(as.character(all_cited) %in% names(ref_text)))
 
 priority_ratings <- read.csv(
   interactive_path("TIER2_priority_effort_ratings.csv"),
@@ -223,11 +278,13 @@ strategic_df$quadrant <- ifelse(
 
 recs_list <- lapply(seq_len(nrow(df)), function(i) {
   list(
-    id    = trimws(as.character(df$id[i])),
-    title = trimws(df$title[i]),
-    desc  = trimws(df$description[i]),
-    cat   = trimws(df$category[i]),
-    stks  = as.list(trimws(strsplit(trimws(df$stakeholder[i]), ";")[[1]]))
+    id      = trimws(as.character(df$id[i])),
+    title   = trimws(df$title[i]),
+    desc    = df$desc_html[i],
+    refs    = df$refs_html[i],
+    cat     = trimws(df$category[i]),
+    stks    = as.list(trimws(strsplit(trimws(df$stakeholder[i]), ";")[[1]])),
+    actions = rec_actions(df$id[i])
   )
 })
 
@@ -263,7 +320,7 @@ spoke_recs_list <- lapply(seq_len(nrow(df)), function(i) {
   list(
     id = trimws(as.character(df$id[i])),
     title = trimws(df$title[i]),
-    desc = trimws(df$description[i]),
+    desc = df$desc_html[i],
     cat = trimws(df$category[i]),
     stks = as.list(trimws(strsplit(trimws(df$stakeholder[i]), ";")[[1]])),
     icon = if (file.exists(icon_path)) knitr::image_uri(icon_path) else NA_character_
@@ -282,6 +339,56 @@ cat('<script id="t2-strategic-data" type="application/json">', strategic_json, '
 ```
 
 ```{=html}
+<style>
+  .t2-rec-text p { margin:0 0 10px; font-size:13px; color:#3a4f7a; line-height:1.75; }
+  .t2-cite { color:#0A7C78; text-decoration:none; }
+  .t2-cite:hover, .t2-cite:focus { text-decoration:underline; }
+  .t2-sub { font-family:system-ui,-apple-system,sans-serif; margin:14px 0 6px; font-size:12px; font-weight:700; color:#0D2557; text-transform:uppercase; letter-spacing:.4px; }
+  .t2-sub-note { font-weight:400; text-transform:none; letter-spacing:0; color:#6b7ea8; }
+  .t2-actions { margin:0 0 8px; padding-left:20px; font-size:13px; color:#3a4f7a; line-height:1.6; }
+  .t2-actions li { margin-bottom:3px; }
+  .t2-action-note { display:block; font-size:11.5px; color:#6b7ea8; }
+  .t2-actions-stk { margin:8px 0 2px; font-size:12.5px; font-weight:600; color:#0D2557; }
+  .t2-details > summary { cursor:pointer; font-size:12px; font-weight:700; color:#0D2557; text-transform:uppercase; letter-spacing:.4px; margin:14px 0 6px; }
+  ol.t2-refs { margin:0; padding-left:2.6em; font-size:12px; color:#3a4f7a; line-height:1.55; }
+  ol.t2-refs li { margin-bottom:4px; overflow-wrap:anywhere; }
+  ol.t2-refs a { color:#0D2557; }
+  #t2-references ol.t2-refs li:target { background:#d6f8f5; }
+</style>
+<script>
+window.T2 = (() => {
+  const recs = JSON.parse(document.getElementById("t2-recs-data").textContent)
+  const byId = Object.fromEntries(recs.map(rec => [rec.id, rec]))
+  const esc = value => String(value)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+  const items = list => `<ul class="t2-actions">${list.map(a =>
+    `<li>${esc(a.text)}${a.note ? `<span class="t2-action-note">Note: ${esc(a.note)}</span>` : ""}</li>`).join("")}</ul>`
+  const SUB_NOTE = `<span class="t2-sub-note">(Table S1: examples, not prescriptive requirements)</span>`
+  // Recommendation text, illustrative actions and references. With a
+  // stakeholder, only that stakeholder's actions are shown (and shown first).
+  function body(id, opts = {}) {
+    const rec = byId[id]
+    if (!rec) return ""
+    const groups = rec.actions || []
+    let actions = ""
+    if (opts.stakeholder) {
+      const group = groups.find(g => g.stakeholder === opts.stakeholder)
+      if (group) actions = `<p class="t2-sub">Illustrative actions for ${esc(group.stakeholder)} ${SUB_NOTE}</p>${items(group.items)}`
+    } else if (groups.length) {
+      actions = `<details class="t2-details"><summary>Illustrative actions by stakeholder</summary>
+        <p class="t2-sub-note" style="font-size:12px;margin:0 0 4px">Table S1: examples of actions stakeholders might consider, not prescriptive requirements.</p>
+        ${groups.map(g => `<p class="t2-actions-stk">${esc(g.stakeholder)}</p>${items(g.items)}`).join("")}</details>`
+    }
+    const text = `<div class="t2-rec-text">${rec.desc}</div>`
+    const refs = rec.refs ? `<details class="t2-details" open><summary>References</summary>${rec.refs}</details>` : ""
+    return opts.stakeholder ? actions + text + refs : text + actions + refs
+  }
+  return { recs, byId, body, esc }
+})()
+</script>
+```
+
+```{=html}
 <div id="t2-spoke-mount"></div>
 <script>
 (() => {
@@ -292,20 +399,20 @@ const spokeShortTitles = ({
   "R1.2": "Standards for data re-use",
   "R1.3": "Persistent identifiers & metadata",
   "R2.1": "Responsible reproducibility metrics",
-  "R2.2": "Fund replication studies",
+  "R2.2": "Funding of replication studies",
   "R3.1": "Training ecosystems & networks",
-  "R3.2": "Leadership & researcher training",
+  "R3.2": "Leadership engagement & training",
   "R3.3": "Journal infrastructure capacity",
-  "R4.1": "Efficacy of interventions",
-  "R4.2": "Costs & benefits of interventions",
-  "R4.3": "Enable metaresearch workflows"
+  "R4.1": "Efficacy of measures to improve reproducibility",
+  "R4.2": "Costs & benefits of measures to improve reproducibility",
+  "R4.3": "Meta-research workflows"
 })
 
 const spokeThemeMeta = [
-  { id: "R1", label: "R1 Infrastructure, Standards & Community", color: "#0D2557", text: "#FFFFFF" },
-  { id: "R2", label: "R2 Incentives & Policy", color: "#32dbce", text: "#0D2557" },
-  { id: "R3", label: "R3 Training & Skills", color: "#6B8FBF", text: "#FFFFFF" },
-  { id: "R4", label: "R4 Strengthening the Evidence-base", color: "#C2F5F2", text: "#0D2557" }
+  { id: "R1", label: "R1 Infrastructure, standards and community", color: "#0D2557", text: "#FFFFFF" },
+  { id: "R2", label: "R2 Incentives and policy", color: "#32dbce", text: "#0D2557" },
+  { id: "R3", label: "R3 Training and skills", color: "#6B8FBF", text: "#FFFFFF" },
+  { id: "R4", label: "R4 Strengthening the evidence base", color: "#C2F5F2", text: "#0D2557" }
 ]
 
 const spokeWidget = (() => {
@@ -342,7 +449,7 @@ const spokeWidget = (() => {
   svg.setAttribute("class", "t2-spoke-svg")
   svg.setAttribute("viewBox", "-525 -525 1050 1050")
   svg.setAttribute("role", "img")
-  svg.setAttribute("aria-label", "TIER2 recommendations arranged as clickable spokes around four themes")
+  svg.setAttribute("aria-label", "Eleven paths forward: recommendations for reproducible research arranged as clickable spokes around four themes")
   frame.appendChild(svg)
 
   const polar = (radius, angle) => [radius * Math.sin(angle), -radius * Math.cos(angle)]
@@ -377,15 +484,15 @@ const spokeWidget = (() => {
     svg.appendChild(path)
     const [tx, ty] = polar(120, index * Math.PI / 2 + Math.PI / 4)
     const themeLines = {
-      R1: ["R1 Infrastructure,", "standards &", "community"],
-      R2: ["R2 Incentives", "& Policy"],
-      R3: ["R3 Training", "& Skills"],
-      R4: ["R4 Strengthening", "the Evidence-base"]
+      R1: ["R1 Infrastructure,", "standards and", "community"],
+      R2: ["R2 Incentives", "and policy"],
+      R3: ["R3 Training", "and skills"],
+      R4: ["R4 Strengthening", "the evidence base"]
     }
     const lines = themeLines[theme.id]
     const inwardAnchor = tx >= 0 ? "start" : "end"
     const labelX = tx >= 0 ? 22 : -22
-    const themeText = addText(svg, labelX, ty, "", {"text-anchor":inwardAnchor,"font-size":"15","font-weight":"700",fill:theme.text})
+    const themeText = addText(svg, labelX, ty, "", {"text-anchor":inwardAnchor,"font-size":"14","font-weight":"700",fill:theme.text})
     lines.forEach((line, lineIndex) => {
       const span = document.createElementNS(ns, "tspan")
       span.setAttribute("x", labelX)
@@ -397,8 +504,9 @@ const spokeWidget = (() => {
 
   const centre = document.createElementNS(ns, "circle")
   centre.setAttribute("r", "62"); centre.setAttribute("fill", "#FFFFFF"); svg.appendChild(centre)
-  addText(svg, 0, -5, "TIER2", {"text-anchor":"middle","font-size":"24","font-weight":"700",fill:"#0D2557"})
-  addText(svg, 0, 19, "Recommendations", {"text-anchor":"middle","font-size":"11",fill:"#0D2557"})
+  ;["Eleven", "paths", "forward"].forEach((word, i) => {
+    addText(svg, 0, -14 + i * 20, word, {"text-anchor":"middle","dominant-baseline":"middle","font-size":"18","font-weight":"700",fill:"#0D2557"})
+  })
 
   let active = null
   const renderDetail = (rec, theme) => {
@@ -409,8 +517,8 @@ const spokeWidget = (() => {
         <button type="button" class="t2-spoke-close" aria-label="Close recommendation detail" style="border:0;background:transparent;color:#6b7ea8;font-size:21px;cursor:pointer">×</button>
       </div>
       <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">${rec.title}</p>
-      <p style="margin:0 0 10px;font-size:13px;color:#3a4f7a;line-height:1.75">${rec.desc}</p>
-      <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center"><span style="font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500">Stakeholder ownership:</span>${rec.stks.map(stk => `<span class="t2-spoke-owner">${stk}</span>`).join("")}</div>`
+      <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:10px"><span style="font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500">Stakeholder ownership:</span>${rec.stks.map(stk => `<span class="t2-spoke-owner">${stk}</span>`).join("")}</div>
+      ${window.T2.body(rec.id)}`
     detail.querySelector(".t2-spoke-close").addEventListener("click", () => {
       if (active) active.classList.remove("active")
       active = null; detail.style.display = "none"; hint.style.display = "block"
@@ -480,29 +588,29 @@ const recs = JSON.parse(document.getElementById("t2-recs-data").textContent)
 
 const cats = [
   {
-    label: "R1 Infrastructure, Standards & Community",
-    match: "R1 Infrastructure, Standards & Community",
+    label: "Infrastructure & standards",
+    match: "Infrastructure, standards and community",
     color: "#0D2557",   // navy
     bg:    "#dce3f0",   // light navy tint
     tx:    "#0D2557"
   },
   {
-    label: "R2 Incentives & Policy",
-    match: "R2 Incentives & Policy",
+    label: "Incentives & policy",
+    match: "Incentives and policy",
     color: "#32dbce",   // brand teal
     bg:    "#d6f8f5",   // light teal tint
     tx:    "#084845"    // dark teal for legibility
   },
   {
-    label: "R3 Training & Skills",
-    match: "R3 Training & Skills",
+    label: "Training & skills",
+    match: "Training and skills",
     color: "#1a7fc4",   // mid-blue (between navy and teal)
     bg:    "#daeaf8",   // light mid-blue tint
     tx:    "#0a3358"
   },
   {
-    label: "R4 Strengthening the Evidence-base",
-    match: "R4 Strengthening the Evidence-base",
+    label: "Evidence base",
+    match: "Strengthening the evidence base",
     color: "#4E9B8E",   // muted sea-green
     bg:    "#E3F3F0",   // light sea-green tint
     tx:    "#1F4F49"
@@ -675,10 +783,10 @@ const widget = (() => {
     cats.map(c =>
       `<th data-category="${c.match}">
          <span style="margin-right:7px;font-size:14px;vertical-align:middle">${({
-           "R1 Infrastructure, Standards & Community": "🏗️",
-           "R2 Incentives & Policy": "⚖️",
-           "R3 Training & Skills": "🎓",
-           "R4 Strengthening the Evidence-base": "🔎"
+           "Infrastructure & standards": "🏗️",
+           "Incentives & policy": "⚖️",
+           "Training & skills": "🎓",
+           "Evidence base": "🔎"
          })[c.label]}</span>${c.label}
        </th>`
     ).join("");
@@ -726,7 +834,7 @@ const widget = (() => {
   // Hint
   const hint = document.createElement("p");
   hint.className = "t2-hint";
-  hint.textContent = "Click any recommendation chip to view its full description.";
+  hint.textContent = "Click any recommendation chip to view the illustrative actions for that stakeholder, the full recommendation text and its references.";
   root.appendChild(hint);
 
   // ── Event handling ────────────────────────────────────────────────────────
@@ -779,11 +887,11 @@ const widget = (() => {
                 <span style="font-size:12px;color:#6b7ea8;font-weight:500">${cat.label}</span>
               </div>
               <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">${rec.title}</p>
-              <p style="margin:0 0 12px;font-size:13px;color:#3a4f7a;line-height:1.75">${rec.desc}</p>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+              <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:10px">
                 <span style="font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500">Stakeholder ownership:</span>
                 ${rec.stks.map(s => `<span class="t2-stk-tag">${s.trim()}</span>`).join("")}
               </div>
+              ${window.T2.body(rec.id, { stakeholder: activeStakeholder })}
             </div>
           `;
         }).join("")}
@@ -866,7 +974,7 @@ const widget = (() => {
     }
   }
 
-  function renderDetail(rec) {
+  function renderDetail(rec, stakeholder) {
     const cat = cats.find(c => c.match === rec.cat.trim());
     detail.style.display = "block";
     detail.style.borderLeftColor = cat.color;
@@ -882,13 +990,11 @@ const widget = (() => {
       <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45">
         ${rec.title}
       </p>
-      <p style="margin:0 0 14px;font-size:13px;color:#3a4f7a;line-height:1.75">
-        ${rec.desc}
-      </p>
-      <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+      <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:10px">
         <span style="font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500">Stakeholder ownership:</span>
         ${rec.stks.map(s => `<span class="t2-stk-tag">${s.trim()}</span>`).join("")}
       </div>
+      ${window.T2.body(rec.id, { stakeholder })}
     `;
     detail.querySelector("#t2-close-btn").addEventListener("click", () => {
       detail.style.display = "none";
@@ -932,7 +1038,8 @@ const widget = (() => {
     activeChip = chip;
 
     const rec = recs.find(r => r.id === chip.dataset.id);
-    if (rec) renderDetail(rec);
+    const cell = chip.closest(".t2-cell");
+    if (rec) renderDetail(rec, cell ? cell.dataset.stakeholder : null);
   });
 
   resetBtn.addEventListener("click", () => {
@@ -954,7 +1061,7 @@ document.getElementById("t2-matrix-mount").appendChild(widget)
 
 ## Stakeholder–Recommendation Network
 
-This network view shows the same stakeholder–recommendation relationships from a node-link perspective. Click a recommendation node to view its full title and description below the graph.
+This network view shows the same stakeholder–recommendation relationships from a node-link perspective. Click a recommendation node to view its full title, text and references below the graph; click a stakeholder node to list its recommendations with the illustrative actions for that stakeholder.
 
 ```{r}
 #| label: network-graph
@@ -980,10 +1087,10 @@ title_map <- setNames(trimws(df$title), trimws(as.character(df$id)))
 desc_map <- setNames(trimws(df$description), trimws(as.character(df$id)))
 
 category_styles <- list(
-  "R1 Infrastructure, Standards & Community" = list(color = "#0D2557", bg = "#dce3f0", tx = "#0D2557"),
-  "R2 Incentives & Policy" = list(color = "#32dbce", bg = "#d6f8f5", tx = "#084845"),
-  "R3 Training & Skills" = list(color = "#1a7fc4", bg = "#daeaf8", tx = "#0a3358"),
-  "R4 Strengthening the Evidence-base" = list(color = "#4E9B8E", bg = "#E3F3F0", tx = "#1F4F49")
+  "Infrastructure, standards and community" = list(color = "#0D2557", bg = "#dce3f0", tx = "#0D2557"),
+  "Incentives and policy" = list(color = "#32dbce", bg = "#d6f8f5", tx = "#084845"),
+  "Training and skills" = list(color = "#1a7fc4", bg = "#daeaf8", tx = "#0a3358"),
+  "Strengthening the evidence base" = list(color = "#4E9B8E", bg = "#E3F3F0", tx = "#1F4F49")
 )
 
 edges <- data.frame(
@@ -1157,13 +1264,13 @@ network_event_js <- sprintf(
             <span style=\"font-size:12px;color:#6b7ea8;font-weight:500\">${escapeHtml(meta.category)}</span>
           </div>
           <p style=\"margin:0 0 8px;font-size:15px;font-weight:600;color:#0D2557;line-height:1.45\">${escapeHtml(meta.title)}</p>
-          <p style=\"margin:0 0 12px;font-size:13px;color:#3a4f7a;line-height:1.75\">${escapeHtml(meta.description)}</p>
-          <div style=\"display:flex;flex-wrap:wrap;gap:4px;align-items:center\">
+          <div style=\"display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:10px\">
             <span style=\"font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500\">Stakeholder ownership:</span>
             ${asArray(meta.stakeholders).map(function(stk) {
               return `<span style=\"display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;border:1.5px solid #c5cce0;color:#0D2557;background:#ebecf0;margin:2px;font-weight:500;\">${escapeHtml(stk)}</span>`;
             }).join('')}
           </div>
+          ${window.T2.body(meta.rec_id)}
         </div>
       `;
     } else {
@@ -1176,13 +1283,13 @@ network_event_js <- sprintf(
               <span style=\"font-size:12px;color:#6b7ea8;font-weight:500\">${escapeHtml(rec.category)}</span>
             </div>
             <p style=\"margin:0 0 6px;font-size:14px;font-weight:600;color:#0D2557;line-height:1.45\">${escapeHtml(rec.title)}</p>
-            <p style=\"margin:0 0 10px;font-size:13px;color:#3a4f7a;line-height:1.75\">${escapeHtml(rec.description)}</p>
-            <div style=\"display:flex;flex-wrap:wrap;gap:4px;align-items:center\">
+            <div style=\"display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:10px\">
               <span style=\"font-size:12px;color:#8a99b8;margin-right:4px;font-weight:500\">Stakeholder ownership:</span>
               ${asArray(rec.stakeholders).map(function(stk) {
                 return `<span style=\"display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;border:1.5px solid #c5cce0;color:#0D2557;background:#ebecf0;margin:2px;font-weight:500;\">${escapeHtml(stk)}</span>`;
               }).join('')}
             </div>
+            ${window.T2.body(rec.rec_id, { stakeholder: meta.title })}
           </div>
         `;
       }).join('');
@@ -1384,10 +1491,10 @@ tagList(
         cat_style <- category_styles[[cat_name]]
         label <- switch(
           cat_name,
-          "R1 Infrastructure, Standards & Community" = "R1 Infrastructure, Standards & Community",
-          "R2 Incentives & Policy" = "R2 Incentives & Policy",
-          "R3 Training & Skills" = "R3 Training & Skills",
-          "R4 Strengthening the Evidence-base" = "R4 Strengthening the Evidence-base",
+          "Infrastructure, standards and community" = "Infrastructure & standards",
+          "Incentives and policy" = "Incentives & policy",
+          "Training and skills" = "Training & skills",
+          "Strengthening the evidence base" = "Evidence base",
           cat_name
         )
         tags$span(
@@ -1420,3 +1527,17 @@ tagList(
 ```
 
 ---
+
+---
+
+## References
+
+References cited in the recommendation texts, numbered as in the paper's reference list.
+
+```{r}
+#| label: references
+#| results: asis
+cat('<div id="t2-references">')
+cat(gsub('<li value="(\\d+)">', '<li value="\\1" id="t2-ref-\\1">', ref_list_html(all_cited)))
+cat('</div>')
+```

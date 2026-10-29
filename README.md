@@ -1,11 +1,12 @@
 # TIER2 recommendations
 
-Visualisations of the TIER2 recommendations for strengthening research
-reproducibility. The repository contains publication-ready static figures and a
+Visualisations of the recommendations for reproducible research in
+"Making research more reproducible: eleven paths forward", developed in the
+TIER2 project. The repository contains publication-ready static figures and a
 self-contained interactive webpage showing how the recommendations relate to
 stakeholder groups and thematic categories.
 
-![TIER2 recommendations spoke diagram](01_publication_static/output/tier2_spoke_diagram.png)
+![Spoke diagram of the eleven recommendations](01_publication_static/output/tier2_spoke_diagram.png)
 
 ## Outputs
 
@@ -25,8 +26,11 @@ Generated files are stored in [`01_publication_static/output/`](01_publication_s
 renders a self-contained HTML page containing:
 
 - an interactive spoke diagram with click-to-view recommendation details;
-- a filterable stakeholder responsibility matrix;
-- a stakeholder–recommendation network.
+- a filterable stakeholder responsibility matrix, showing the illustrative
+  actions of Table S1 per stakeholder;
+- a stakeholder–recommendation network;
+- the paper's references cited in the recommendation texts, with the paper's
+  numbering, under each recommendation and at the end of the page.
 
 The rendered page is available locally at
 [`02_interactive_plots/TIER2_stakeholder_matrix.html`](02_interactive_plots/TIER2_stakeholder_matrix.html)
@@ -107,9 +111,20 @@ published as a single file without a separate web server.
 
 ## Data notes
 
-The static and interactive outputs use the same set of 11 recommendations.
-Both read the 12-row recommendation workbook, remove the original `R2.1`
-(`Drive culture change`), and close the numbering gap by renumbering the
-original `R2.2` as `R2.1` and `R2.3` as `R2.2`. The spoke diagrams use shortened
-display labels, while full titles and descriptions remain available in the
-interactive detail view.
+Both folders keep an identical copy of `TIER2_recommendations.xlsx` with three
+sheets:
+
+- `Sheet1`: the eleven recommendations (`No`, `Title`, `Description`,
+  `Category`, `Stakeholder`). Titles and texts are those of the revised
+  manuscript (October 2026), including its numbered citations; categories
+  follow the paper's Table 1; a stakeholder is listed for a recommendation
+  when Table S1 of the supplement gives actions for it.
+- `Actions`: the illustrative actions of Table S1, one row per action, with
+  the table's footnote text in `Note` where it has one.
+- `References`: the paper's numbered reference list.
+
+The static figures read only `Sheet1`. The spoke diagrams use shortened
+display labels, set in `circle_diagram.R` and in the Quarto file.
+`TIER2_priority_effort_ratings.csv` still uses the numbering of the original
+12-recommendation set; the Quarto file drops the original `R2.1` and renumbers
+`R2.2` → `R2.1` and `R2.3` → `R2.2` when reading it.
